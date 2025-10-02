@@ -50,7 +50,7 @@ Siga os passos abaixo para configurar e executar os ambientes de teste.
 ### 1. Clone o Repositório
 
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
+git clone https://github.com/RicardoMBregalda/tcc-log-management
 cd tcc-log-management
 ```
 
