@@ -1,0 +1,61 @@
+services:
+  postgres-primary:
+    image: postgres:14
+    container_name: postgres-primary
+    environment:
+      - POSTGRES_USER=logadmin
+      - POSTGRES_PASSWORD=logpassword
+      - POSTGRES_DB=logdb
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/pgdata
+      - ./init-primary-db.sh:/docker-entrypoint-initdb.d/init-primary-db.sh 
+
+    ports:
+      - "5432:5432" # Expõe a porta do primário para o host
+    # Comandos para habilitar a replicação no servidor primário
+    command: >
+      postgres
+      -c wal_level=replica
+      -c hot_standby=on
+      -c max_wal_senders=10
+      -c archive_mode=on
+      -c archive_command='cd .'
+    networks:
+      - log-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logadmin -d logdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-standby:
+    image: postgres:14
+    container_name: postgres-standby
+    environment:
+      - POSTGRES_USER=logadmin
+      - POSTGRES_PASSWORD=logpassword
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-standby-data:/var/lib/postgresql/data/pgdata
+      - ./init-standby.sh:/docker-entrypoint-initdb.d/init-standby.sh
+    ports:
+      - "5433:5432" # Expõe o standby em uma porta diferente para evitar conflito
+    networks:
+      - log-net
+    # O standby depende da saúde do primário para iniciar
+    depends_on:
+      postgres-primary:
+        condition: service_healthy
+    # Executa nosso script customizado ao invés do comando padrão
+    entrypoint: /docker-entrypoint-initdb.d/init-standby.sh
+
+networks:
+  log-net:
+    external: true
+    name: tcc_log_network
+
+volumes:
+  postgres-data:
+  postgres-standby-data:
