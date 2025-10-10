@@ -267,8 +267,11 @@ services:
       - /var/run/:/host/var/run/
       - ../chaincode/:/opt/gopath/src/github.com/chaincode
       - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
-      - ./config:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
-      - ./setup_network.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/setup_network.sh 
+      - ./config:/opt/gopath/src/github.com/hyperledger/fabric/peer/config
+      - ./setup_network.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/setup_network.sh
+      - ./install_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/install_chaincode.sh
+      - ./test_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/test_chaincode.sh
+      - ./teste_manual.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/teste_manual.sh
     networks:
       - log-net
     depends_on:
