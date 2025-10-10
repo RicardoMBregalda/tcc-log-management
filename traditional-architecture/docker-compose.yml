@@ -10,7 +10,8 @@ services:
       
     volumes:
       - postgres-data:/var/lib/postgresql/data/pgdata
-      - ./init-primary-db.sh:/docker-entrypoint-initdb.d/init-primary-db.sh 
+      - ./scripts/init-primary-db.sh:/docker-entrypoint-initdb.d/init-primary-db.sh
+      - ./scripts/init-logdb.sql:/docker-entrypoint-initdb.d/init-logdb.sql 
 
     ports:
       - "5432:5432" # Expõe a porta do primário para o host
@@ -39,7 +40,7 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - postgres-standby-data:/var/lib/postgresql/data/pgdata
-      - ./init-standby.sh:/docker-entrypoint-initdb.d/init-standby.sh
+      - ./scripts/init-standby.sh:/docker-entrypoint-initdb.d/init-standby.sh
     ports:
       - "5433:5432" # Expõe o standby em uma porta diferente para evitar conflito
     networks:

@@ -195,7 +195,7 @@ def create_log():
             }
             log_collection.insert_one(log_entry)
         except Exception as e:
-            print(f"⚠️  Log registrado na blockchain mas falhou no MongoDB: {e}")
+            print(f"Log registrado na blockchain mas falhou no MongoDB: {e}")
     
     return jsonify({
         "status": "success",
