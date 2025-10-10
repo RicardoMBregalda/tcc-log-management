@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  - job_name: 'fabric-orderer'
+    static_configs:
+      - targets: ['orderer.example.com:9443']
+
+  - job_name: 'fabric-peers'
+    static_configs:
+      - targets:
+          - 'peer0.org1.example.com:9443'
+          - 'peer1.org1.example.com:9443'
+          - 'peer2.org1.example.com:9443'

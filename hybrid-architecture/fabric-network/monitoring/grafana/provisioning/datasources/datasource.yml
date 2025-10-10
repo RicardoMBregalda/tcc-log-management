@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus Fabric
+    uid: prometheus-fabric
+    type: prometheus
+    access: proxy
+    url: http://prometheus-fabric:9090
+    isDefault: true
+    editable: true

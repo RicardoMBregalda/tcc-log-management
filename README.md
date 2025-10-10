@@ -6,23 +6,29 @@ O objetivo deste projeto é implementar e comparar duas arquiteturas para o arma
 
 ## Arquiteturas Implementadas
 
-1.  **Arquitetura Tradicional:** Um cluster de banco de dados PostgreSQL em modo primário-standby, representando uma solução centralizada e de alta disponibilidade.
+1. **Arquitetura Tradicional:** Um cluster de banco de dados PostgreSQL em modo primário-standby, representando uma solução centralizada e de alta disponibilidade.
 
-2.  **Arquitetura Híbrida:** Uma rede blockchain Hyperledger Fabric para ancoragem de hashes de logs (garantia de integridade *on-chain*) e um banco de dados MongoDB para o armazenamento dos logs completos (*off-chain*).
+2. **Arquitetura Híbrida:** Uma rede blockchain Hyperledger Fabric para ancoragem de hashes de logs (garantia de integridade *on-chain*) e um banco de dados MongoDB para o armazenamento dos logs completos (*off-chain*).
 
 ## Estrutura do Repositório
 
-```
+```text
 ├── traditional-architecture/   # Arquivos da arquitetura PostgreSQL
 │   ├── docker-compose.yml
 │   ├── init-primary-db.sh
-│   └── init-standby.sh
+│   ├── init-standby.sh
+│   └── monitoring/
+│       ├── grafana/
+│       └── prometheus/
 ├── hybrid-architecture/        # Arquivos da arquitetura Blockchain
 │   ├── fabric-network/
 │   │   ├── crypto-config.yaml
 │   │   ├── configtx.yaml
 │   │   ├── docker-compose.yml
-│   │   └── generate-artifacts.sh
+│   │   ├── generate-artifacts.sh
+│   │   └── monitoring/
+│   │       ├── grafana/
+│   │       └── prometheus/
 │   └── chaincode/
 │       ├── go.mod
 │       ├── go.sum
@@ -58,25 +64,34 @@ cd tcc-log-management
 
 Este ambiente simula um cluster PostgreSQL com replicação.
 
-1.  Navegue para o diretório da arquitetura:
+1. Navegue para o diretório da arquitetura:
 
     ```bash
     cd traditional-architecture
     ```
 
-2.  Torne os scripts executáveis:
+2. Torne os scripts executáveis:
 
     ```bash
     chmod +x init-primary-db.sh init-standby.sh
     ```
 
-3.  Inicie os contêineres:
+3. Inicie os contêineres:
 
     ```bash
     docker compose up -d
     ```
 
-4.  Para verificar se a replicação está funcionando, execute o teste de "somente leitura" no standby. O comando abaixo deve retornar um erro, confirmando o sucesso da configuração:
+    Esse comando inicializa também o stack de observabilidade com Prometheus (porta 9090) e Grafana (porta 3000).
+
+4. Acesse as interfaces de monitoramento:
+
+    * Prometheus: [http://localhost:9090](http://localhost:9090)
+    * Grafana: [http://localhost:3000](http://localhost:3000) &rarr; login padrão `admin` / `admin` (você será solicitado a definir uma nova senha no primeiro acesso).
+
+    No Grafana, o datasource do Prometheus já está provisionado automaticamente e pronto para criar dashboards.
+
+5. Para verificar se a replicação está funcionando, execute o teste de "somente leitura" no standby. O comando abaixo deve retornar um erro, confirmando o sucesso da configuração:
 
     ```bash
     docker exec -it postgres-standby psql -U logadmin logdb -c "CREATE TABLE test (id INT);"
@@ -86,27 +101,27 @@ Este ambiente simula um cluster PostgreSQL com replicação.
 
 Esta é a configuração da rede blockchain.
 
-1.  Navegue para o diretório da rede Fabric:
+1. Navegue para o diretório da rede Fabric:
 
     ```bash
     cd ../hybrid-architecture/fabric-network 
     # (Se estiver na raiz, use 'cd hybrid-architecture/fabric-network')
     ```
 
-2.  **Baixe as Ferramentas do Hyperledger Fabric.** Este comando baixa os binários `cryptogen` e `configtxgen` necessários.
+2. **Baixe as Ferramentas do Hyperledger Fabric.** Este comando baixa os binários `cryptogen` e `configtxgen` necessários.
 
     ```bash
     curl -sSL [https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/bootstrap.sh](https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/bootstrap.sh) | bash -s -- 2.4.9 1.5.6 -d -s
     ```
 
-3.  **Gere os Artefatos Criptográficos.** Este script cria os certificados, chaves e o bloco gênesis.
+3. **Gere os Artefatos Criptográficos.** Este script cria os certificados, chaves e o bloco gênesis.
 
     ```bash
     chmod +x generate-artifacts.sh
     ./generate-artifacts.sh
     ```
 
-4.  **Inicialize o módulo do Chaincode.**
+4. **Inicialize o módulo do Chaincode.**
 
     ```bash
     cd ../chaincode
@@ -115,39 +130,47 @@ Esta é a configuração da rede blockchain.
     cd ../fabric-network
     ```
 
-5.  **Inicie a Rede Blockchain.** Este comando pode levar vários minutos na primeira vez, pois baixará todas as imagens Docker.
+5. **Inicie a Rede Blockchain.** Este comando pode levar vários minutos na primeira vez, pois baixará todas as imagens Docker.
 
     ```bash
     docker compose up -d
     ```
 
-6.  Aguarde cerca de 40 segundos para os contêineres estabilizarem e, em seguida, **execute o script de setup do canal e do chaincode**. 
+6. Aguarde cerca de 40 segundos para os contêineres estabilizarem e, em seguida, **execute o script de setup do canal e do chaincode**.
 
     ```bash
     chmod +x setup_network.sh
     docker exec cli ./setup_network.sh
     ```
+
     A execução bem-sucedida terminará com a mensagem `########### FIM DO SETUP - SUCESSO! ###########`.
+
+7. Acesse os dashboards operacionais da rede Fabric:
+
+    * Prometheus (porta 9091): [http://localhost:9091](http://localhost:9091)
+    * Grafana (porta 3001): [http://localhost:3001](http://localhost:3001) com `admin` / `admin`
+
+    Tanto o Orderer quanto os Peers expõem métricas no formato Prometheus e já aparecem como alvos prontos para consulta.
 
 
 ### 4. Executando os Testes de Performance
 
 Com os dois ambientes rodando, você pode executar os testes de performance.
 
-1.  Navegue para o diretório de testes:
+1. Navegue para o diretório de testes:
 
     ```bash
     cd ../../testing 
     # (Se estiver em fabric-network, use 'cd ../../testing')
     ```
 
-2.  Instale as dependências Python:
+2. Instale as dependências Python:
 
     ```bash
     pip install psycopg2-binary requests Flask pymongo
     ```
 
-3.  **Para testar a arquitetura PostgreSQL:**
+3. **Para testar a arquitetura PostgreSQL:**
     * Primeiro, crie a tabela de logs no banco de dados primário (execute apenas uma vez):
 
         ```bash
@@ -160,7 +183,7 @@ Com os dois ambientes rodando, você pode executar os testes de performance.
         python3 performance_tester.py postgresql --count 10000 --threads 50
         ```
 
-4.  **Para testar a arquitetura Híbrida:**
+4. **Para testar a arquitetura Híbrida:**
     * **Em um terminal**, inicie o servidor de API. Ele ficará em execução.
 
         ```bash
@@ -172,6 +195,24 @@ Com os dois ambientes rodando, você pode executar os testes de performance.
         ```bash
         python3 performance_tester.py hybrid --count 1000 --threads 20
         ```
+
+## Monitoramento e Observabilidade
+
+O stack Prometheus + Grafana roda junto da arquitetura tradicional e coleta métricas automaticamente do banco primário via `postgres-exporter`.
+
+* **Dashboards:** acesse [http://localhost:3000](http://localhost:3000) com o usuário/senha `admin` / `admin` e crie seus próprios painéis usando o datasource já provisionado.
+* **Exploração de métricas:** Prometheus fica disponível em [http://localhost:9090](http://localhost:9090) para explorar séries temporais e montar consultas antes de levá-las ao Grafana.
+* **Persistência:** os volumes Docker `prometheus-data` e `grafana-storage` garantem que métricas e configurações sobrevivam a reinicializações.
+* **Dashboard pronto:** o painel `PostgreSQL Overview` é carregado automaticamente e traz disponibilidade, TPS, conexões e cache hit do banco `logdb`.
+
+Para a arquitetura híbrida (Fabric + MongoDB) há um stack separado:
+
+* **Prometheus:** [http://localhost:9091](http://localhost:9091)
+* **Grafana:** [http://localhost:3001](http://localhost:3001) com o mesmo login padrão (`admin` / `admin`).
+* **Alvos:** orderer e peers expõem métricas nativas do Fabric em `/metrics`, já configuradas no Prometheus.
+* **Dashboard pronto:** o painel `Fabric Overview` mostra altura da blockchain por peer, throughput do chaincode e taxas de transações do orderer.
+
+> **Nota:** os stacks utilizam portas diferentes para evitar conflitos; caso você suba as duas arquiteturas ao mesmo tempo, ambos os ambientes de monitoramento funcionarão em paralelo.
 
 ## Limpando o Ambiente
 

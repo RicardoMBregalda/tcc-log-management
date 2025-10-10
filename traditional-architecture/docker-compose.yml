@@ -51,6 +51,53 @@ services:
     # Executa nosso script customizado ao invés do comando padrão
     entrypoint: /docker-entrypoint-initdb.d/init-standby.sh
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter
+    environment:
+      - DATA_SOURCE_NAME=postgresql://logadmin:logpassword@postgres-primary:5432/logdb?sslmode=disable
+    depends_on:
+      - postgres-primary
+    networks:
+      - log-net
+    ports:
+      - "9187:9187"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - prometheus-data:/prometheus
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - postgres-exporter
+    networks:
+      - log-net
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./monitoring/grafana/provisioning/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - log-net
+    ports:
+      - "3000:3000"
+
 networks:
   log-net:
     external: true
@@ -59,3 +106,5 @@ networks:
 volumes:
   postgres-data:
   postgres-standby-data:
+  prometheus-data:
+  grafana-storage:
