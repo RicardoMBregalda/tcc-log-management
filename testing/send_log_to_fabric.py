@@ -70,7 +70,6 @@ def send_to_fabric(log_data):
             'metadata': log_data['metadata']
         }
         
-        # Adiciona stacktrace se existir
         if log_data.get('stacktrace'):
             if isinstance(payload['metadata'], dict):
                 payload['metadata']['stacktrace'] = log_data['stacktrace']
@@ -85,7 +84,6 @@ def send_to_fabric(log_data):
             result = response.json()
             return True, result.get('hash', '')
         elif response.status_code == 500 and 'already exists' in response.text.lower():
-            # Log já existe, não é erro
             return True, 'existing'
         else:
             return False, f"HTTP {response.status_code}: {response.text}"
@@ -140,23 +138,20 @@ def main():
     
     log_id = sys.argv[1]
     
-    # 1. Busca log do PostgreSQL
     log_data = get_log_from_postgres(log_id)
     if not log_data:
         print(f"Log {log_id} não encontrado no PostgreSQL", file=sys.stderr)
         sys.exit(1)
     
-    # 2. Envia para o Fabric
     success, result = send_to_fabric(log_data)
     
-    # 3. Atualiza status
     if success:
         update_sync_status(log_id, True, result)
-        print(f"✅ Log {log_id} enviado com sucesso! Hash: {result}")
+        print(f"Log {log_id} enviado com sucesso! Hash: {result}")
         sys.exit(0)
     else:
         update_sync_status(log_id, False, error=result)
-        print(f"❌ Falha ao enviar log {log_id}: {result}", file=sys.stderr)
+        print(f"Falha ao enviar log {log_id}: {result}", file=sys.stderr)
         sys.exit(1)
 
 

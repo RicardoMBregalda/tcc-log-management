@@ -68,7 +68,6 @@ def send_to_fabric(log_data):
             'metadata': log_data.get('metadata', {})
         }
         
-        # Adiciona stacktrace se existir
         if log_data.get('stacktrace'):
             if isinstance(payload['metadata'], dict):
                 payload['metadata']['stacktrace'] = log_data['stacktrace']
@@ -123,25 +122,13 @@ def update_sync_status(log_id, success, fabric_hash=None, error=None):
         cursor.close()
         conn.close()
     except Exception as e:
-        print(f"⚠️  Aviso: Erro ao atualizar sync_control: {e}")
+        print(f"Aviso: Erro ao atualizar sync_control: {e}")
 
 
 def create_and_sync_log(source, level, message, metadata=None, stacktrace=None):
     """
     Função principal: Cria log no PostgreSQL e sincroniza com Fabric
-    
-    Args:
-        source: Origem do log (ex: 'api-gateway', 'auth-service')
-        level: Nível (INFO, DEBUG, WARNING, ERROR, CRITICAL)
-        message: Mensagem do log
-        metadata: Dicionário com metadados adicionais (opcional)
-        stacktrace: Stack trace de erro (opcional)
-    
-    Returns:
-        tuple: (success: bool, log_id: str, details: str)
     """
-    
-    # Gera ID único
     log_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     
@@ -155,49 +142,67 @@ def create_and_sync_log(source, level, message, metadata=None, stacktrace=None):
         'stacktrace': stacktrace
     }
     
-    print(f"📝 Criando log {log_id}...")
+    print(f"Criando log {log_id}...")
     
-    # 1. Insere no PostgreSQL
     pg_success, pg_message = insert_log_to_postgres(log_data)
     if not pg_success:
-        print(f"❌ {pg_message}")
-        return False, log_id, pg_message
+        print(pg_message)
+        return {
+            'success': False,
+            'status': 'failed',
+            'log_id': log_id,
+            'fabric_hash': None,
+            'message': pg_message
+        }
     
-    print(f"✅ {pg_message}")
+    print(pg_message)
+    print("Enviando para Fabric...")
     
-    # 2. Envia para o Fabric
-    print(f"🔗 Enviando para Fabric...")
     fabric_success, fabric_hash, fabric_message = send_to_fabric(log_data)
     
     if fabric_success:
-        print(f"✅ {fabric_message}")
-        print(f"   Hash: {fabric_hash}")
+        print(f"{fabric_message}")
+        print(f"Hash: {fabric_hash}\n")
     else:
-        print(f"❌ {fabric_message}")
+        print(f"{fabric_message}\n")
     
-    # 3. Atualiza status de sincronização
     update_sync_status(log_id, fabric_success, fabric_hash, fabric_message if not fabric_success else None)
     
-    # Resultado final
     if pg_success and fabric_success:
-        return True, log_id, f"Log criado e sincronizado com sucesso! Hash: {fabric_hash}"
+        return {
+            'success': True,
+            'status': 'synced',
+            'log_id': log_id,
+            'fabric_hash': fabric_hash,
+            'message': f"Log criado e sincronizado com sucesso! Hash: {fabric_hash}"
+        }
     elif pg_success:
-        return False, log_id, f"Log criado no PostgreSQL mas falhou sincronização: {fabric_message}"
+        return {
+            'success': False,
+            'status': 'failed',
+            'log_id': log_id,
+            'fabric_hash': None,
+            'message': f"Log criado no PostgreSQL mas falhou sincronização: {fabric_message}"
+        }
     else:
-        return False, log_id, pg_message
+        return {
+            'success': False,
+            'status': 'failed',
+            'log_id': log_id,
+            'fabric_hash': None,
+            'message': pg_message
+        }
 
 
 def main():
     """Exemplo de uso interativo"""
     print("=" * 60)
     print("Script de Criação e Sincronização de Logs")
-    print("PostgreSQL → Fabric → MongoDB")
+    print("PostgreSQL -> Fabric -> MongoDB")
     print("=" * 60)
     print()
     
-    # Exemplo de uso
     if len(sys.argv) > 1:
-        # Modo com argumentos
         if len(sys.argv) < 4:
             print("Uso: python3 insert_and_sync_log.py <source> <level> <message> [metadata_json]")
             print()
@@ -209,11 +214,8 @@ def main():
         level = sys.argv[2]
         message = sys.argv[3]
         metadata = json.loads(sys.argv[4]) if len(sys.argv) > 4 else {}
-        
-        success, log_id, details = create_and_sync_log(source, level, message, metadata)
-        
+        result = create_and_sync_log(source, level, message, metadata)
     else:
-        # Modo interativo
         print("Modo interativo - insira os dados do log:")
         print()
         
@@ -225,17 +227,17 @@ def main():
         metadata = json.loads(metadata_input) if metadata_input else {"test": True}
         
         print()
-        success, log_id, details = create_and_sync_log(source, level, message, metadata)
+        result = create_and_sync_log(source, level, message, metadata)
     
     print()
     print("=" * 60)
-    if success:
-        print(f"✅ SUCESSO: {details}")
-        print(f"   Log ID: {log_id}")
+    if result['success']:
+        print(f"SUCESSO: {result['message']}")
+        print(f"   Log ID: {result['log_id']}\n")
         sys.exit(0)
     else:
-        print(f"❌ FALHA: {details}")
-        print(f"   Log ID: {log_id}")
+        print(f"FALHA: {result['message']}")
+        print(f"   Log ID: {result['log_id']}\n")
         sys.exit(1)
 
 

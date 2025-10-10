@@ -13,10 +13,12 @@ from datetime import datetime
 API_BASE_URL = "http://localhost:5000"
 TEST_LOG_ID = f"test_log_{int(time.time())}"
 
+
 def print_section(title):
     print(f"\n{'=' * 60}")
     print(f"  {title}")
     print('=' * 60)
+
 
 def test_health():
     """Testa endpoint de health check"""
@@ -27,7 +29,8 @@ def test_health():
     print(f"Resposta: {json.dumps(response.json(), indent=2)}")
     
     assert response.status_code == 200, "Health check falhou"
-    print("✅ Health check OK")
+    print("Health check OK")
+
 
 def test_create_log():
     """Testa criação de log"""
@@ -56,8 +59,9 @@ def test_create_log():
     assert result['log_id'] == TEST_LOG_ID, "ID do log não confere"
     assert 'hash' in result, "Hash não foi retornado"
     
-    print(f"✅ Log criado com sucesso. Hash: {result['hash'][:16]}...")
+    print(f"Log criado com sucesso. Hash: {result['hash'][:16]}...")
     return result['hash']
+
 
 def test_get_log(log_id):
     """Testa busca de log por ID"""
@@ -76,17 +80,17 @@ def test_get_log(log_id):
         print(f"  - Level: {log['level']}")
         print(f"  - Message: {log['message']}")
         print(f"  - Hash: {log['hash'][:16]}...")
-        print("✅ Busca por ID OK")
+        print("Busca por ID OK")
         return log
     else:
-        print(f"❌ Erro ao buscar log: {response.text}")
+        print(f"Erro ao buscar log: {response.text}")
         return None
+
 
 def test_list_logs():
     """Testa listagem de logs"""
     print_section("4. TESTANDO LISTAGEM DE LOGS")
     
-    # Teste 1: Listar todos
     print("4.1. Listando todos os logs (limit=5)...")
     response = requests.get(f"{API_BASE_URL}/logs?limit=5")
     print(f"Status: {response.status_code}")
@@ -97,25 +101,24 @@ def test_list_logs():
         print(f"Primeiros logs:")
         for i, log in enumerate(result['logs'][:3], 1):
             print(f"  {i}. {log['id']} - {log['level']} - {log['source']}")
-        print("✅ Listagem OK")
+        print("Listagem OK")
     
-    # Teste 2: Filtrar por nível
     print("\n4.2. Filtrando logs por nível INFO...")
     response = requests.get(f"{API_BASE_URL}/logs?level=INFO")
     
     if response.status_code == 200:
         result = response.json()
         print(f"Logs INFO encontrados: {result['count']}")
-        print("✅ Filtro por nível OK")
+        print("Filtro por nível OK")
     
-    # Teste 3: Filtrar por source
     print("\n4.3. Filtrando logs por source 'test-script'...")
     response = requests.get(f"{API_BASE_URL}/logs?source=test-script")
     
     if response.status_code == 200:
         result = response.json()
         print(f"Logs de 'test-script': {result['count']}")
-        print("✅ Filtro por source OK")
+        print("Filtro por source OK")
+
 
 def test_log_history(log_id):
     """Testa histórico do log"""
@@ -137,9 +140,10 @@ def test_log_history(log_id):
             print(f"    - Timestamp: {tx['timestamp']}")
             print(f"    - Is Delete: {tx['isDelete']}")
         
-        print("✅ Histórico OK")
+        print("Histórico OK")
     else:
-        print(f"❌ Erro ao buscar histórico: {response.text}")
+        print(f"Erro ao buscar histórico: {response.text}")
+
 
 def test_verify_log(log_id):
     """Testa verificação de integridade"""
@@ -162,11 +166,12 @@ def test_verify_log(log_id):
         print(f"  - Mensagem: {result['message']}")
         
         if result['valid']:
-            print("✅ Log íntegro")
+            print("Log íntegro")
         else:
-            print("❌ ALERTA: Log foi modificado!")
+            print("ALERTA: Log foi modificado!")
     else:
-        print(f"❌ Erro na verificação: {response.text}")
+        print(f"Erro na verificação: {response.text}")
+
 
 def test_stats():
     """Testa endpoint de estatísticas"""
@@ -186,16 +191,17 @@ def test_stats():
             if 'logs_by_level' in stats['mongodb']:
                 print(f"    - Por nível:")
                 for level, count in stats['mongodb']['logs_by_level'].items():
-                    print(f"      • {level}: {count}")
+                    print(f"      - {level}: {count}")
         
         if 'blockchain' in stats:
             print(f"\n  Blockchain:")
             if 'total_logs' in stats['blockchain']:
                 print(f"    - Total de logs: {stats['blockchain']['total_logs']}")
         
-        print("\n✅ Estatísticas OK")
+        print("\nEstatísticas OK")
     else:
-        print(f"❌ Erro ao buscar estatísticas: {response.text}")
+        print(f"Erro ao buscar estatísticas: {response.text}")
+
 
 def test_create_multiple_logs():
     """Cria múltiplos logs para teste"""
@@ -232,13 +238,14 @@ def test_create_multiple_logs():
         
         if response.status_code == 201:
             success_count += 1
-            print(f"  ✅ Criado: {log_data['id']}")
+            print(f"  Criado: {log_data['id']}")
         else:
-            print(f"  ❌ Falhou: {response.text}")
+            print(f"  Falhou: {response.text}")
         
-        time.sleep(1)  # Aguarda entre criações
+        time.sleep(1)
     
-    print(f"\n✅ {success_count}/{len(logs_to_create)} logs criados com sucesso")
+    print(f"\n{success_count}/{len(logs_to_create)} logs criados com sucesso")
+
 
 def main():
     """Executa todos os testes"""
@@ -249,52 +256,37 @@ def main():
     print(f"\nAPI Base URL: {API_BASE_URL}")
     
     try:
-        # 1. Health Check
         test_health()
-        
-        # 2. Criar log de teste
         log_hash = test_create_log()
-        time.sleep(3)  # Aguarda propagação do bloco
-        
-        # 3. Buscar log criado
-        log = test_get_log(TEST_LOG_ID)
-        
-        # 4. Listar logs
+        time.sleep(3)
+        test_get_log(TEST_LOG_ID)
         test_list_logs()
-        
-        # 5. Histórico
         test_log_history(TEST_LOG_ID)
-        
-        # 6. Verificar integridade
         test_verify_log(TEST_LOG_ID)
-        
-        # 7. Estatísticas
         test_stats()
-        
-        # 8. Criar logs adicionais
         test_create_multiple_logs()
         
-        # Resumo final
         print_section("RESUMO")
-        print("✅ Todos os testes passaram com sucesso!")
-        print(f"✅ Log de teste criado: {TEST_LOG_ID}")
-        print("✅ API está funcionando corretamente")
+        print("Todos os testes passaram com sucesso!")
+        print(f"Log de teste criado: {TEST_LOG_ID}")
+        print("API está funcionando corretamente")
         
     except AssertionError as e:
-        print(f"\n❌ ERRO: {e}")
+        print(f"\nERRO: {e}")
         return 1
     except requests.exceptions.ConnectionError:
-        print(f"\n❌ ERRO: Não foi possível conectar à API em {API_BASE_URL}")
+        print(f"\nERRO: Não foi possível conectar à API em {API_BASE_URL}")
         print("Certifique-se de que o servidor está rodando:")
         print("  python3 api_server.py")
         return 1
     except Exception as e:
-        print(f"\n❌ ERRO INESPERADO: {e}")
+        print(f"\nERRO INESPERADO: {e}")
         import traceback
         traceback.print_exc()
         return 1
     
     return 0
+
 
 if __name__ == "__main__":
     exit(main())
