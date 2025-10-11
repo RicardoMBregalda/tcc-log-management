@@ -24,8 +24,10 @@ services:
     # ... (sem alterações aqui)
     image: hyperledger/fabric-orderer:2.4
     container_name: orderer.example.com
+    cpus: '2.0'
+    mem_limit: 2g
     environment:
-      - FABRIC_LOGGING_SPEC=INFO
+      - FABRIC_LOGGING_SPEC=WARNING
       - ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:9443
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:9444
       - ORDERER_METRICS_PROVIDER=prometheus
@@ -89,6 +91,8 @@ services:
   peer0.org1.example.com:
     image: hyperledger/fabric-peer:2.4
     container_name: peer0.org1.example.com
+    cpus: '2.0'
+    mem_limit: 2g
     environment:
       # --- VARIÁVEIS DO COUCHDB ADICIONADAS ---
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -98,7 +102,9 @@ services:
       # --- Fim das variáveis do CouchDB ---
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=tcc_log_network
-      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_VM_DOCKER_HOSTCONFIG_CPUS=1.0
+      - CORE_VM_DOCKER_HOSTCONFIG_MEMORY=1073741824
+      - FABRIC_LOGGING_SPEC=WARNING
       - CORE_METRICS_PROVIDER=prometheus
       - CORE_METRICS_PROMETHEUS_HANDLER_PATH=/metrics
       - CORE_METRICS_PROMETHEUS_PORT=9443
@@ -134,6 +140,8 @@ services:
   peer1.org1.example.com:
     image: hyperledger/fabric-peer:2.4
     container_name: peer1.org1.example.com
+    cpus: '2.0'
+    mem_limit: 2g
     environment:
       # --- VARIÁVEIS DO COUCHDB ADICIONADAS ---
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -143,7 +151,9 @@ services:
       # --- Fim das variáveis do CouchDB ---
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=tcc_log_network
-      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_VM_DOCKER_HOSTCONFIG_CPUS=1.0
+      - CORE_VM_DOCKER_HOSTCONFIG_MEMORY=1073741824
+      - FABRIC_LOGGING_SPEC=WARNING
       - CORE_METRICS_PROVIDER=prometheus
       - CORE_METRICS_PROMETHEUS_HANDLER_PATH=/metrics
       - CORE_METRICS_PROMETHEUS_PORT=9443
@@ -190,6 +200,8 @@ services:
   peer2.org1.example.com:
     image: hyperledger/fabric-peer:2.4
     container_name: peer2.org1.example.com
+    cpus: '2.0'
+    mem_limit: 2g
     environment:
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
@@ -197,7 +209,9 @@ services:
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=tcc_log_network
-      - FABRIC_LOGGING_SPEC=INFO
+      - CORE_VM_DOCKER_HOSTCONFIG_CPUS=1.0
+      - CORE_VM_DOCKER_HOSTCONFIG_MEMORY=1073741824
+      - FABRIC_LOGGING_SPEC=WARNING
       - CORE_METRICS_PROVIDER=prometheus
       - CORE_METRICS_PROMETHEUS_HANDLER_PATH=/metrics
       - CORE_METRICS_PROMETHEUS_PORT=9443

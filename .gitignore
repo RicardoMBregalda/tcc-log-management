@@ -18,3 +18,6 @@ venv/
 
 # Logs e arquivos de saída
 *.log
+# Vendor do Go (dependências externas)
+vendor/
+**/vendor/

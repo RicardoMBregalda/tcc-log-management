@@ -37,15 +37,16 @@ else
     echo "✅ Dependências já instaladas"
 fi
 
-# Verifica se MongoDB está rodando
+# Verifica se Redis está rodando
 echo ""
-echo "🗄️  Verificando MongoDB..."
+echo "🗄️  Verificando Redis..."
 
-if docker ps | grep -q mongo; then
-    echo "✅ MongoDB está rodando"
+if docker ps | grep -q redis; then
+    echo "✅ Redis está rodando (cache otimizado)"
 else
-    echo "⚠️  MongoDB não está rodando"
-    echo "   A API funcionará apenas com Fabric (sem cache MongoDB)"
+    echo "⚠️  Redis não está rodando"
+    echo "   A API funcionará sem cache (performance reduzida)"
+    echo "   Para iniciar Redis: docker run -d --name redis -p 6379:6379 redis:alpine"
 fi
 
 # Verifica se Fabric está rodando
@@ -81,14 +82,16 @@ echo "=========================================="
 echo "🎉 Tudo pronto! Iniciando servidor..."
 echo "=========================================="
 echo ""
-echo "📡 API estará disponível em: http://localhost:5000"
-echo "📖 Documentação: API_README.md"
+echo "📡 API estará disponível em: http://localhost:5001"
 echo ""
 echo "Para testar a API, execute em outro terminal:"
 echo "  python3 test_api.py"
 echo ""
+echo "Para testes de performance:"
+echo "  python3 performance_tester.py"
+echo ""
 echo "=========================================="
 echo ""
 
-# Inicia o servidor Flask
+# Inicia o servidor Flask (versão otimizada)
 python3 api_server.py
