@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S7",
+  "scenario_name": "Alto Volume + Baixa Taxa",
+  "architecture": "postgres",
+  "config": {
+    "total_logs": 1000000,
+    "target_rate": 100,
+    "workers": 10
+  },
+  "execution": {
+    "total_time_seconds": 10455.49,
+    "successful_inserts": 999901,
+    "failed_inserts": 99,
+    "actual_throughput_logs_per_second": 95.63
+  },
+  "latency_insert_ms": {
+    "p50": 14.79,
+    "p95": 21.53,
+    "p99": 29.0,
+    "avg": 14.41
+  },
+  "resources": {
+    "cpu": {
+      "avg": 2.746859850154253,
+      "max": 58.2,
+      "min": 0.0
+    },
+    "memory": {
+      "avg": 33.15940943146761,
+      "max": 35.1,
+      "min": 32.7
+    },
+    "disk": {
+      "read_mb": 118.69140625,
+      "write_mb": 18031.6484375
+    }
+  },
+  "timestamp": "2025-10-14T08:59:25.763969"
+}

@@ -187,15 +187,7 @@ services:
       - peer0.org1.example.com
       - couchdb2 # Adiciona dependência do CouchDB
 
-  # --- MONITORAMENTO ---
-
-  node-exporter:
-    image: prom/node-exporter:v1.3.1
-    container_name: node-exporter
-    ports:
-      - "9100:9100"
-    networks:
-      - log-net
+  # --- MONITORAMENTO (será configurado depois) ---
 
   peer2.org1.example.com:
     image: hyperledger/fabric-peer:2.4
@@ -285,7 +277,6 @@ services:
       - ./setup_network.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/setup_network.sh
       - ./install_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/install_chaincode.sh
       - ./test_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/test_chaincode.sh
-      - ./teste_manual.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/teste_manual.sh
     networks:
       - log-net
     depends_on:
@@ -302,13 +293,116 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=30d"
+      - "--web.enable-lifecycle"
     volumes:
       - prometheus-fabric-data:/prometheus
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
     networks:
       - log-net
     ports:
       - "9091:9090"
+
+  # ========================================
+  # MONITORING EXPORTERS
+  # ========================================
+
+  # cAdvisor - Métricas de containers Docker
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: cadvisor
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - log-net
+    restart: unless-stopped
+
+  # Node Exporter - Métricas do sistema host
+  node-exporter:
+    image: prom/node-exporter:v1.7.0
+    container_name: node-exporter
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    volumes:
+      - /:/host:ro,rslave
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - log-net
+    restart: unless-stopped
+
+  # MongoDB Exporter
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.40
+    container_name: mongodb-exporter
+    command:
+      - '--mongodb.uri=mongodb://mongodb:27017'
+      - '--collect-all'
+      - '--compatible-mode'
+    ports:
+      - "9216:9216"
+    networks:
+      - log-net
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  # Redis Exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - log-net
+    restart: unless-stopped
+
+  # PostgreSQL Exporter - Primary
+  postgres-exporter-primary:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter-primary
+    environment:
+      - DATA_SOURCE_NAME=postgresql://loguser:logpass@postgres-primary:5432/logdb?sslmode=disable
+      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
+    ports:
+      - "9187:9187"
+    volumes:
+      - ./monitoring/prometheus/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    networks:
+      - log-net
+    restart: unless-stopped
+
+  # PostgreSQL Exporter - Standby
+  postgres-exporter-standby:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres-exporter-standby
+    environment:
+      - DATA_SOURCE_NAME=postgresql://loguser:logpass@postgres-standby:5432/logdb?sslmode=disable
+      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
+    ports:
+      - "9188:9187"
+    volumes:
+      - ./monitoring/prometheus/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    networks:
+      - log-net
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:11.2.2
@@ -317,6 +411,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - grafana-fabric-storage:/var/lib/grafana
       - ./monitoring/grafana/provisioning/datasources/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro

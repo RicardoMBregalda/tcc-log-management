@@ -1,0 +1,5 @@
+Arquitetura,Tipo,Throughput,Latencia_Avg,Latencia_Median,Latencia_P95,Latencia_P99,CPU_Avg,CPU_Max,Memory_Avg,Memory_Max,Disk_Read_MB,Disk_Write_MB
+postgresql,insert,76.56,8.63,8.80,15.53,19.07,1.9,27.6,26.3,26.5,0.00,44.42
+postgresql,query,9.90,0.95,0.85,1.67,0.00,2.0,32.9,26.3,26.4,0.00,0.82
+hybrid,insert,66.06,24.36,23.88,34.74,52.76,13.8,61.4,26.8,27.4,0.12,62.86
+hybrid,query,7.57,5.36,4.91,7.14,0.00,2.2,25.9,27.1,27.3,0.00,4.30

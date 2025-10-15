@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S6",
+  "scenario_name": "M\u00e9dio Volume + Alta Taxa",
+  "architecture": "hybrid",
+  "config": {
+    "total_logs": 100000,
+    "target_rate": 10000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 416.1,
+    "successful_inserts": 100000,
+    "failed_inserts": 0,
+    "actual_throughput_logs_per_second": 240.33
+  },
+  "latency_insert_ms": {
+    "p50": 218.31,
+    "p95": 329.71,
+    "p99": 2352.81,
+    "avg": 279.61
+  },
+  "resources": {
+    "cpu": {
+      "avg": 24.475964391691395,
+      "max": 56.6,
+      "min": 6.3
+    },
+    "memory": {
+      "avg": 39.23590504451039,
+      "max": 42.1,
+      "min": 36.7
+    },
+    "disk": {
+      "read_mb": 4.10546875,
+      "write_mb": 974.52734375
+    }
+  },
+  "timestamp": "2025-10-13T23:31:29.507659"
+}

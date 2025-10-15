@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S2",
+  "scenario_name": "Baixo Volume + M\u00e9dia Taxa",
+  "architecture": "postgres",
+  "config": {
+    "total_logs": 10000,
+    "target_rate": 1000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 19.66,
+    "successful_inserts": 9901,
+    "failed_inserts": 99,
+    "actual_throughput_logs_per_second": 503.52
+  },
+  "latency_insert_ms": {
+    "p50": 87.62,
+    "p95": 163.53,
+    "p99": 221.35,
+    "avg": 88.66
+  },
+  "resources": {
+    "cpu": {
+      "avg": 28.847058823529412,
+      "max": 77.1,
+      "min": 13.3
+    },
+    "memory": {
+      "avg": 99.05294117647058,
+      "max": 99.2,
+      "min": 98.9
+    },
+    "disk": {
+      "read_mb": 13000.046875,
+      "write_mb": 137.42578125
+    }
+  },
+  "timestamp": "2025-10-14T05:08:44.878933"
+}

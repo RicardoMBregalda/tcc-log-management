@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S9",
+  "scenario_name": "Alto Volume + Alta Taxa",
+  "architecture": "hybrid",
+  "config": {
+    "total_logs": 1000000,
+    "target_rate": 10000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 4844.14,
+    "successful_inserts": 1000000,
+    "failed_inserts": 0,
+    "actual_throughput_logs_per_second": 206.44
+  },
+  "latency_insert_ms": {
+    "p50": 159.25,
+    "p95": 340.56,
+    "p99": 504.9,
+    "avg": 178.1
+  },
+  "resources": {
+    "cpu": {
+      "avg": 89.39200848656294,
+      "max": 100.0,
+      "min": 5.4
+    },
+    "memory": {
+      "avg": 89.50153229608675,
+      "max": 99.2,
+      "min": 78.5
+    },
+    "disk": {
+      "read_mb": 466613.705078125,
+      "write_mb": 9244.97265625
+    }
+  },
+  "timestamp": "2025-10-14T05:06:23.545011"
+}

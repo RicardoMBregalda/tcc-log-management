@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S3",
+  "scenario_name": "Baixo Volume + Alta Taxa",
+  "architecture": "hybrid",
+  "config": {
+    "total_logs": 10000,
+    "target_rate": 10000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 38.67,
+    "successful_inserts": 10000,
+    "failed_inserts": 0,
+    "actual_throughput_logs_per_second": 258.61
+  },
+  "latency_insert_ms": {
+    "p50": 221.9,
+    "p95": 303.51,
+    "p99": 1274.77,
+    "avg": 247.94
+  },
+  "resources": {
+    "cpu": {
+      "avg": 25.753125,
+      "max": 44.0,
+      "min": 14.8
+    },
+    "memory": {
+      "avg": 31.2625,
+      "max": 31.9,
+      "min": 31.0
+    },
+    "disk": {
+      "read_mb": 0.06640625,
+      "write_mb": 93.421875
+    }
+  },
+  "timestamp": "2025-10-13T22:58:58.277662"
+}

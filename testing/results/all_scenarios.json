@@ -1,0 +1,704 @@
+[
+  {
+    "scenario_id": "S1",
+    "scenario_name": "Baixo Volume + Baixa Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 111.71,
+      "successful_inserts": 10000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 89.52
+    },
+    "latency_insert_ms": {
+      "p50": 26.69,
+      "p95": 38.38,
+      "p99": 46.91,
+      "avg": 28.75
+    },
+    "resources": {
+      "cpu": {
+        "avg": 12.972527472527473,
+        "max": 40.3,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 30.052747252747253,
+        "max": 30.4,
+        "min": 29.0
+      },
+      "disk": {
+        "read_mb": 0.01953125,
+        "write_mb": 164.5234375
+      }
+    },
+    "timestamp": "2025-10-13T22:57:20.570022"
+  },
+  {
+    "scenario_id": "S2",
+    "scenario_name": "Baixo Volume + M\u00e9dia Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 35.79,
+      "successful_inserts": 10000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 279.43
+    },
+    "latency_insert_ms": {
+      "p50": 113.65,
+      "p95": 198.42,
+      "p99": 262.6,
+      "avg": 123.93
+    },
+    "resources": {
+      "cpu": {
+        "avg": 36.69310344827586,
+        "max": 54.2,
+        "min": 23.0
+      },
+      "memory": {
+        "avg": 30.751724137931035,
+        "max": 31.3,
+        "min": 30.1
+      },
+      "disk": {
+        "read_mb": 0.0,
+        "write_mb": 124.5078125
+      }
+    },
+    "timestamp": "2025-10-13T22:58:06.371211"
+  },
+  {
+    "scenario_id": "S3",
+    "scenario_name": "Baixo Volume + Alta Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 38.67,
+      "successful_inserts": 10000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 258.61
+    },
+    "latency_insert_ms": {
+      "p50": 221.9,
+      "p95": 303.51,
+      "p99": 1274.77,
+      "avg": 247.94
+    },
+    "resources": {
+      "cpu": {
+        "avg": 25.753125,
+        "max": 44.0,
+        "min": 14.8
+      },
+      "memory": {
+        "avg": 31.2625,
+        "max": 31.9,
+        "min": 31.0
+      },
+      "disk": {
+        "read_mb": 0.06640625,
+        "write_mb": 93.421875
+      }
+    },
+    "timestamp": "2025-10-13T22:58:58.277662"
+  },
+  {
+    "scenario_id": "S4",
+    "scenario_name": "M\u00e9dio Volume + Baixa Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 1100.61,
+      "successful_inserts": 100000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 90.86
+    },
+    "latency_insert_ms": {
+      "p50": 27.39,
+      "p95": 39.4,
+      "p99": 48.08,
+      "avg": 28.71
+    },
+    "resources": {
+      "cpu": {
+        "avg": 14.983443708609272,
+        "max": 67.8,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 31.73774834437086,
+        "max": 32.6,
+        "min": 31.1
+      },
+      "disk": {
+        "read_mb": 2.76171875,
+        "write_mb": 1753.55078125
+      }
+    },
+    "timestamp": "2025-10-13T23:17:28.942227"
+  },
+  {
+    "scenario_id": "S5",
+    "scenario_name": "M\u00e9dio Volume + M\u00e9dia Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 401.11,
+      "successful_inserts": 100000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 249.31
+    },
+    "latency_insert_ms": {
+      "p50": 218.62,
+      "p95": 409.78,
+      "p99": 1229.81,
+      "avg": 262.6
+    },
+    "resources": {
+      "cpu": {
+        "avg": 23.70153374233129,
+        "max": 58.5,
+        "min": 6.9
+      },
+      "memory": {
+        "avg": 34.52361963190184,
+        "max": 37.0,
+        "min": 32.1
+      },
+      "disk": {
+        "read_mb": 0.9765625,
+        "write_mb": 1038.89453125
+      }
+    },
+    "timestamp": "2025-10-13T23:24:23.345166"
+  },
+  {
+    "scenario_id": "S6",
+    "scenario_name": "M\u00e9dio Volume + Alta Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 416.1,
+      "successful_inserts": 100000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 240.33
+    },
+    "latency_insert_ms": {
+      "p50": 218.31,
+      "p95": 329.71,
+      "p99": 2352.81,
+      "avg": 279.61
+    },
+    "resources": {
+      "cpu": {
+        "avg": 24.475964391691395,
+        "max": 56.6,
+        "min": 6.3
+      },
+      "memory": {
+        "avg": 39.23590504451039,
+        "max": 42.1,
+        "min": 36.7
+      },
+      "disk": {
+        "read_mb": 4.10546875,
+        "write_mb": 974.52734375
+      }
+    },
+    "timestamp": "2025-10-13T23:31:29.507659"
+  },
+  {
+    "scenario_id": "S7",
+    "scenario_name": "Alto Volume + Baixa Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 10549.26,
+      "successful_inserts": 1000000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 94.79
+    },
+    "latency_insert_ms": {
+      "p50": 29.15,
+      "p95": 54.99,
+      "p99": 101.9,
+      "avg": 33.24
+    },
+    "resources": {
+      "cpu": {
+        "avg": 21.30971397139714,
+        "max": 98.8,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 44.27827282728273,
+        "max": 49.6,
+        "min": 41.6
+      },
+      "disk": {
+        "read_mb": 78.32421875,
+        "write_mb": 21719.75
+      }
+    },
+    "timestamp": "2025-10-14T02:27:29.329432"
+  },
+  {
+    "scenario_id": "S8",
+    "scenario_name": "Alto Volume + M\u00e9dia Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 4667.69,
+      "successful_inserts": 1000000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 214.24
+    },
+    "latency_insert_ms": {
+      "p50": 221.64,
+      "p95": 383.63,
+      "p99": 739.61,
+      "avg": 232.59
+    },
+    "resources": {
+      "cpu": {
+        "avg": 65.51032751613674,
+        "max": 100.0,
+        "min": 6.2
+      },
+      "memory": {
+        "avg": 62.189983265598855,
+        "max": 79.3,
+        "min": 44.6
+      },
+      "disk": {
+        "read_mb": 119.328125,
+        "write_mb": 11074.390625
+      }
+    },
+    "timestamp": "2025-10-14T03:45:28.036930"
+  },
+  {
+    "scenario_id": "S9",
+    "scenario_name": "Alto Volume + Alta Taxa",
+    "architecture": "hybrid",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 4844.14,
+      "successful_inserts": 1000000,
+      "failed_inserts": 0,
+      "actual_throughput_logs_per_second": 206.44
+    },
+    "latency_insert_ms": {
+      "p50": 159.25,
+      "p95": 340.56,
+      "p99": 504.9,
+      "avg": 178.1
+    },
+    "resources": {
+      "cpu": {
+        "avg": 89.39200848656294,
+        "max": 100.0,
+        "min": 5.4
+      },
+      "memory": {
+        "avg": 89.50153229608675,
+        "max": 99.2,
+        "min": 78.5
+      },
+      "disk": {
+        "read_mb": 466613.705078125,
+        "write_mb": 9244.97265625
+      }
+    },
+    "timestamp": "2025-10-14T05:06:23.545011"
+  },
+  {
+    "scenario_id": "S1",
+    "scenario_name": "Baixo Volume + Baixa Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 101.53,
+      "successful_inserts": 9901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 97.52
+    },
+    "latency_insert_ms": {
+      "p50": 17.64,
+      "p95": 61.2,
+      "p99": 101.84,
+      "avg": 24.07
+    },
+    "resources": {
+      "cpu": {
+        "avg": 53.44157303370786,
+        "max": 100.0,
+        "min": 5.0
+      },
+      "memory": {
+        "avg": 98.98876404494382,
+        "max": 99.2,
+        "min": 98.8
+      },
+      "disk": {
+        "read_mb": 61897.046875,
+        "write_mb": 242.109375
+      }
+    },
+    "timestamp": "2025-10-14T05:08:15.180749"
+  },
+  {
+    "scenario_id": "S2",
+    "scenario_name": "Baixo Volume + M\u00e9dia Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 19.66,
+      "successful_inserts": 9901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 503.52
+    },
+    "latency_insert_ms": {
+      "p50": 87.62,
+      "p95": 163.53,
+      "p99": 221.35,
+      "avg": 88.66
+    },
+    "resources": {
+      "cpu": {
+        "avg": 28.847058823529412,
+        "max": 77.1,
+        "min": 13.3
+      },
+      "memory": {
+        "avg": 99.05294117647058,
+        "max": 99.2,
+        "min": 98.9
+      },
+      "disk": {
+        "read_mb": 13000.046875,
+        "write_mb": 137.42578125
+      }
+    },
+    "timestamp": "2025-10-14T05:08:44.878933"
+  },
+  {
+    "scenario_id": "S3",
+    "scenario_name": "Baixo Volume + Alta Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 10000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 19.83,
+      "successful_inserts": 9901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 499.32
+    },
+    "latency_insert_ms": {
+      "p50": 92.83,
+      "p95": 168.76,
+      "p99": 226.47,
+      "avg": 95.7
+    },
+    "resources": {
+      "cpu": {
+        "avg": 26.441176470588236,
+        "max": 94.7,
+        "min": 15.0
+      },
+      "memory": {
+        "avg": 99.16470588235295,
+        "max": 99.2,
+        "min": 99.1
+      },
+      "disk": {
+        "read_mb": 13525.44921875,
+        "write_mb": 138.26953125
+      }
+    },
+    "timestamp": "2025-10-14T05:09:14.734989"
+  },
+  {
+    "scenario_id": "S4",
+    "scenario_name": "M\u00e9dio Volume + Baixa Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 1430.89,
+      "successful_inserts": 99901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 69.82
+    },
+    "latency_insert_ms": {
+      "p50": 17.27,
+      "p95": 130.76,
+      "p99": 738.27,
+      "avg": 71.58
+    },
+    "resources": {
+      "cpu": {
+        "avg": 35.21364055299539,
+        "max": 100.0,
+        "min": 4.8
+      },
+      "memory": {
+        "avg": 99.27483870967743,
+        "max": 99.5,
+        "min": 99.0
+      },
+      "disk": {
+        "read_mb": 1721260.115234375,
+        "write_mb": 1948.19921875
+      }
+    },
+    "timestamp": "2025-10-14T05:33:15.729018"
+  },
+  {
+    "scenario_id": "S5",
+    "scenario_name": "M\u00e9dio Volume + M\u00e9dia Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 1726.57,
+      "successful_inserts": 99901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 57.86
+    },
+    "latency_insert_ms": {
+      "p50": 101.15,
+      "p95": 7998.36,
+      "p99": 17111.88,
+      "avg": 1578.69
+    },
+    "resources": {
+      "cpu": {
+        "avg": 41.25450041288192,
+        "max": 97.8,
+        "min": 5.1
+      },
+      "memory": {
+        "avg": 94.23179190751445,
+        "max": 99.5,
+        "min": 32.6
+      },
+      "disk": {
+        "read_mb": 2240137.8203125,
+        "write_mb": 1679.796875
+      }
+    },
+    "timestamp": "2025-10-14T06:02:12.391321"
+  },
+  {
+    "scenario_id": "S6",
+    "scenario_name": "M\u00e9dio Volume + Alta Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 100000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 156.26,
+      "successful_inserts": 99901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 639.31
+    },
+    "latency_insert_ms": {
+      "p50": 69.9,
+      "p95": 138.86,
+      "p99": 164.51,
+      "avg": 76.07
+    },
+    "resources": {
+      "cpu": {
+        "avg": 9.494160583941605,
+        "max": 39.9,
+        "min": 4.5
+      },
+      "memory": {
+        "avg": 33.68102189781022,
+        "max": 34.2,
+        "min": 32.9
+      },
+      "disk": {
+        "read_mb": 51.5703125,
+        "write_mb": 1766.46484375
+      }
+    },
+    "timestamp": "2025-10-14T06:04:58.709628"
+  },
+  {
+    "scenario_id": "S7",
+    "scenario_name": "Alto Volume + Baixa Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 100,
+      "workers": 10
+    },
+    "execution": {
+      "total_time_seconds": 10455.49,
+      "successful_inserts": 999901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 95.63
+    },
+    "latency_insert_ms": {
+      "p50": 14.79,
+      "p95": 21.53,
+      "p99": 29.0,
+      "avg": 14.41
+    },
+    "resources": {
+      "cpu": {
+        "avg": 2.746859850154253,
+        "max": 58.2,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 33.15940943146761,
+        "max": 35.1,
+        "min": 32.7
+      },
+      "disk": {
+        "read_mb": 118.69140625,
+        "write_mb": 18031.6484375
+      }
+    },
+    "timestamp": "2025-10-14T08:59:25.763969"
+  },
+  {
+    "scenario_id": "S8",
+    "scenario_name": "Alto Volume + M\u00e9dia Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 1000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 2943.97,
+      "successful_inserts": 999901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 339.64
+    },
+    "latency_insert_ms": {
+      "p50": 111.5,
+      "p95": 348.86,
+      "p99": 399.79,
+      "avg": 146.23
+    },
+    "resources": {
+      "cpu": {
+        "avg": 5.863247524752476,
+        "max": 68.4,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 33.37263366336634,
+        "max": 33.7,
+        "min": 33.0
+      },
+      "disk": {
+        "read_mb": 3.09375,
+        "write_mb": 18792.4375
+      }
+    },
+    "timestamp": "2025-10-14T09:48:40.243776"
+  },
+  {
+    "scenario_id": "S9",
+    "scenario_name": "Alto Volume + Alta Taxa",
+    "architecture": "postgres",
+    "config": {
+      "total_logs": 1000000,
+      "target_rate": 10000,
+      "workers": 100
+    },
+    "execution": {
+      "total_time_seconds": 2482.35,
+      "successful_inserts": 999901,
+      "failed_inserts": 99,
+      "actual_throughput_logs_per_second": 402.8
+    },
+    "latency_insert_ms": {
+      "p50": 93.07,
+      "p95": 332.14,
+      "p99": 383.41,
+      "avg": 122.4
+    },
+    "resources": {
+      "cpu": {
+        "avg": 6.487081565299387,
+        "max": 65.3,
+        "min": 0.0
+      },
+      "memory": {
+        "avg": 33.44186704384724,
+        "max": 34.5,
+        "min": 33.1
+      },
+      "disk": {
+        "read_mb": 27.34375,
+        "write_mb": 19503.4921875
+      }
+    },
+    "timestamp": "2025-10-14T10:30:13.087553"
+  }
+]

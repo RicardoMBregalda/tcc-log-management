@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S7",
+  "scenario_name": "Alto Volume + Baixa Taxa",
+  "architecture": "hybrid",
+  "config": {
+    "total_logs": 1000000,
+    "target_rate": 100,
+    "workers": 10
+  },
+  "execution": {
+    "total_time_seconds": 10549.26,
+    "successful_inserts": 1000000,
+    "failed_inserts": 0,
+    "actual_throughput_logs_per_second": 94.79
+  },
+  "latency_insert_ms": {
+    "p50": 29.15,
+    "p95": 54.99,
+    "p99": 101.9,
+    "avg": 33.24
+  },
+  "resources": {
+    "cpu": {
+      "avg": 21.30971397139714,
+      "max": 98.8,
+      "min": 0.0
+    },
+    "memory": {
+      "avg": 44.27827282728273,
+      "max": 49.6,
+      "min": 41.6
+    },
+    "disk": {
+      "read_mb": 78.32421875,
+      "write_mb": 21719.75
+    }
+  },
+  "timestamp": "2025-10-14T02:27:29.329432"
+}

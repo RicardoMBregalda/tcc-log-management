@@ -1,19 +1,184 @@
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+# ========================================
+# PROMETHEUS CONFIGURATION - TCC
+# ========================================
+# Coleta de métricas para análise comparativa:
+# - Hyperledger Fabric (Orderer + Peers)
+# - MongoDB (off-chain storage)
+# - PostgreSQL (traditional architecture)
+# - API Flask (custom metrics)
+# - Containers Docker (cAdvisor)
+# - Sistema Host (Node Exporter)
+# ========================================
 
+global:
+  scrape_interval: 10s       # Coleta a cada 10 segundos (mais preciso)
+  evaluation_interval: 10s   # Avalia regras a cada 10 segundos
+  scrape_timeout: 8s         # Timeout de 8 segundos
+
+  # Labels externos para identificação
+  external_labels:
+    cluster: 'tcc-hybrid-architecture'
+    environment: 'testing'
+
+# ========================================
+# ALERTING CONFIGURATION
+# ========================================
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - 'alertmanager:9093'  # Descomente se usar AlertManager
+
+# ========================================
+# RULES CONFIGURATION
+# ========================================
+rule_files:
+  - 'alerts.yml'
+
+# ========================================
+# SCRAPE CONFIGURATIONS
+# ========================================
 scrape_configs:
+  # ----------------------------------------
+  # 1. PROMETHEUS (self-monitoring)
+  # ----------------------------------------
   - job_name: 'prometheus'
     static_configs:
       - targets: ['prometheus:9090']
+        labels:
+          component: 'monitoring'
 
+  # ----------------------------------------
+  # 2. HYPERLEDGER FABRIC - ORDERER
+  # ----------------------------------------
   - job_name: 'fabric-orderer'
     static_configs:
       - targets: ['orderer.example.com:9443']
+        labels:
+          component: 'blockchain'
+          role: 'orderer'
+    metrics_path: '/metrics'
 
+  # ----------------------------------------
+  # 3. HYPERLEDGER FABRIC - PEERS
+  # ----------------------------------------
   - job_name: 'fabric-peers'
     static_configs:
       - targets:
           - 'peer0.org1.example.com:9443'
+        labels:
+          component: 'blockchain'
+          role: 'peer'
+          peer_id: 'peer0'
+      
+      - targets:
           - 'peer1.org1.example.com:9443'
+        labels:
+          component: 'blockchain'
+          role: 'peer'
+          peer_id: 'peer1'
+      
+      - targets:
           - 'peer2.org1.example.com:9443'
+        labels:
+          component: 'blockchain'
+          role: 'peer'
+          peer_id: 'peer2'
+    metrics_path: '/metrics'
+
+  # ----------------------------------------
+  # 4. MONGODB EXPORTER (off-chain storage)
+  # ----------------------------------------
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          component: 'database'
+          db_type: 'mongodb'
+          architecture: 'hybrid'
+    metrics_path: '/metrics'
+
+  # ----------------------------------------
+  # 5. POSTGRESQL EXPORTER (traditional)
+  # ----------------------------------------
+  - job_name: 'postgresql-primary'
+    static_configs:
+      - targets: ['postgres-exporter-primary:9187']
+        labels:
+          component: 'database'
+          db_type: 'postgresql'
+          architecture: 'traditional'
+          role: 'primary'
+    metrics_path: '/metrics'
+
+  - job_name: 'postgresql-standby'
+    static_configs:
+      - targets: ['postgres-exporter-standby:9187']
+        labels:
+          component: 'database'
+          db_type: 'postgresql'
+          architecture: 'traditional'
+          role: 'standby'
+    metrics_path: '/metrics'
+
+  # ----------------------------------------
+  # 6. REDIS EXPORTER (cache)
+  # ----------------------------------------
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          component: 'cache'
+          db_type: 'redis'
+    metrics_path: '/metrics'
+
+  # ----------------------------------------
+  # 7. API FLASK (custom metrics)
+  # ----------------------------------------
+  - job_name: 'api-flask'
+    static_configs:
+      - targets: ['host.docker.internal:5001']
+        labels:
+          component: 'api'
+          framework: 'flask'
+    metrics_path: '/metrics'
+    scrape_interval: 5s  # API precisa de coleta mais frequente
+
+  # ----------------------------------------
+  # 8. cADVISOR (métricas de containers)
+  # ----------------------------------------
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          component: 'monitoring'
+          type: 'container-metrics'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ----------------------------------------
+  # 9. NODE EXPORTER (métricas do host)
+  # ----------------------------------------
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          component: 'monitoring'
+          type: 'host-metrics'
+    metrics_path: '/metrics'
+
+  # ----------------------------------------
+  # 10. COUCHDB (Fabric State Database)
+  # ----------------------------------------
+  - job_name: 'couchdb'
+    static_configs:
+      - targets: ['couchdb:5984']
+        labels:
+          component: 'database'
+          db_type: 'couchdb'
+          role: 'state-db'
+    metrics_path: '/_node/_local/_prometheus'
+    scheme: http
+    basic_auth:
+      username: 'admin'
+      password: 'adminpw'

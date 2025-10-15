@@ -1,0 +1,177 @@
+# ========================================
+# PROMETHEUS ALERTS - TCC
+# ========================================
+# Alertas básicos para monitoramento durante testes
+# ========================================
+
+groups:
+  # ----------------------------------------
+  # ALERTAS DE DISPONIBILIDADE
+  # ----------------------------------------
+  - name: availability_alerts
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Serviço {{ $labels.job }} está DOWN"
+          description: "O serviço {{ $labels.job }} ({{ $labels.instance }}) está inacessível há mais de 1 minuto."
+
+      - alert: FabricPeerDown
+        expr: up{job="fabric-peers"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Fabric Peer {{ $labels.peer_id }} está DOWN"
+          description: "O peer {{ $labels.peer_id }} está inacessível. Sistema pode ter perdido consenso."
+
+      - alert: FabricOrdererDown
+        expr: up{job="fabric-orderer"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Fabric Orderer está DOWN"
+          description: "O serviço de ordenação está inacessível. Blockchain não pode processar transações."
+
+  # ----------------------------------------
+  # ALERTAS DE PERFORMANCE
+  # ----------------------------------------
+  - name: performance_alerts
+    interval: 30s
+    rules:
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU alta no container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} está usando mais de 80% de CPU."
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memória alta no container {{ $labels.name }}"
+          description: "Container {{ $labels.name }} está usando mais de 90% da memória alocada."
+
+      - alert: HighDiskUsage
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) < 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disco quase cheio"
+          description: "Espaço em disco está abaixo de 10% disponível."
+
+  # ----------------------------------------
+  # ALERTAS DE BLOCKCHAIN
+  # ----------------------------------------
+  - name: blockchain_alerts
+    interval: 30s
+    rules:
+      - alert: LowBlockchainThroughput
+        expr: rate(consensus_etcdraft_committed_block_number[5m]) < 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Throughput baixo no blockchain"
+          description: "Blockchain está processando menos de 1 bloco por minuto."
+
+      - alert: HighTransactionLatency
+        expr: histogram_quantile(0.95, rate(endorser_proposal_duration_bucket[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latência alta nas transações"
+          description: "95% das transações estão levando mais de 5 segundos."
+
+  # ----------------------------------------
+  # ALERTAS DE BANCO DE DADOS
+  # ----------------------------------------
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: MongoDBConnectionsHigh
+        expr: mongodb_connections{state="current"} > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MongoDB com muitas conexões"
+          description: "MongoDB tem {{ $value }} conexões ativas."
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_statements_mean_exec_time_seconds[5m]) > 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL com queries lentas"
+          description: "Tempo médio de query está acima de 1 segundo."
+
+      - alert: PostgreSQLReplicationLag
+        expr: pg_replication_lag > 60
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL com lag de replicação"
+          description: "Standby está {{ $value }} segundos atrasado do primário."
+
+  # ----------------------------------------
+  # ALERTAS DE CACHE
+  # ----------------------------------------
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      - alert: RedisMemoryHigh
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis com memória alta"
+          description: "Redis está usando mais de 90% da memória configurada."
+
+      - alert: RedisCacheMissRate
+        expr: rate(redis_keyspace_misses_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) > 0.3
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: "Taxa de cache miss alta"
+          description: "Mais de 30% das requisições ao cache estão falhando."
+
+  # ----------------------------------------
+  # ALERTAS DE API
+  # ----------------------------------------
+  - name: api_alerts
+    interval: 30s
+    rules:
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API com latência alta"
+          description: "95% das requisições estão levando mais de 2 segundos."
+
+      - alert: HighAPIErrorRate
+        expr: rate(flask_http_request_total{status=~"5.."}[5m]) / rate(flask_http_request_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taxa de erro alta na API"
+          description: "Mais de 5% das requisições estão retornando erro 5xx."

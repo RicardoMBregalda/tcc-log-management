@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S8",
+  "scenario_name": "Alto Volume + M\u00e9dia Taxa",
+  "architecture": "hybrid",
+  "config": {
+    "total_logs": 1000000,
+    "target_rate": 1000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 4667.69,
+    "successful_inserts": 1000000,
+    "failed_inserts": 0,
+    "actual_throughput_logs_per_second": 214.24
+  },
+  "latency_insert_ms": {
+    "p50": 221.64,
+    "p95": 383.63,
+    "p99": 739.61,
+    "avg": 232.59
+  },
+  "resources": {
+    "cpu": {
+      "avg": 65.51032751613674,
+      "max": 100.0,
+      "min": 6.2
+    },
+    "memory": {
+      "avg": 62.189983265598855,
+      "max": 79.3,
+      "min": 44.6
+    },
+    "disk": {
+      "read_mb": 119.328125,
+      "write_mb": 11074.390625
+    }
+  },
+  "timestamp": "2025-10-14T03:45:28.036930"
+}

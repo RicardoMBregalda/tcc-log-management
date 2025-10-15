@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -15,19 +17,30 @@ type SmartContract struct {
 
 // Log describes the structure of a log entry
 type Log struct {
-	ID        string    `json:"id"`
-	Hash      string    `json:"hash"`
-	Timestamp time.Time `json:"timestamp"`
-	Source    string    `json:"source"`
-	Level     string    `json:"level"`
-	Message   string    `json:"message"`
-	Metadata  string    `json:"metadata"`
+	ID         string    `json:"id"`
+	Hash       string    `json:"hash"`
+	Timestamp  time.Time `json:"timestamp"`
+	Source     string    `json:"source"`
+	Level      string    `json:"level"`
+	Message    string    `json:"message"`
+	Metadata   string    `json:"metadata"`
+	Stacktrace string    `json:"stacktrace,omitempty"` // Optional field for ERROR logs
+}
+
+// MerkleBatch describes a batch of logs with Merkle Root
+type MerkleBatch struct {
+	BatchID    string    `json:"batch_id"`
+	MerkleRoot string    `json:"merkle_root"`
+	Timestamp  time.Time `json:"timestamp"`
+	NumLogs    int       `json:"num_logs"`
+	LogIDs     []string  `json:"log_ids"` // List of log IDs in this batch
 }
 
 // CreateLog creates a new log entry in the ledger (OPTIMIZED v2)
 // Removed LogExists check for better performance (50% faster!)
 // Idempotent design: duplicate inserts will overwrite with same data
-func (s *SmartContract) CreateLog(ctx contractapi.TransactionContextInterface, id string, hash string, timestamp string, source string, level string, message string, metadata string) error {
+// Now accepts optional stacktrace parameter (8th parameter)
+func (s *SmartContract) CreateLog(ctx contractapi.TransactionContextInterface, id string, hash string, timestamp string, source string, level string, message string, metadata string, stacktrace string) error {
 	// OPTIMIZATION 1: Skip LogExists check (saves 1 GetState call)
 	// Trade-off: Duplicate IDs will silently overwrite (acceptable for idempotent logs)
 	
@@ -40,13 +53,14 @@ func (s *SmartContract) CreateLog(ctx contractapi.TransactionContextInterface, i
 
 	// OPTIMIZATION 3: Direct struct creation
 	log := Log{
-		ID:        id,
-		Hash:      hash,
-		Timestamp: parsedTime,
-		Source:    source,
-		Level:     level,
-		Message:   message,
-		Metadata:  metadata,
+		ID:         id,
+		Hash:       hash,
+		Timestamp:  parsedTime,
+		Source:     source,
+		Level:      level,
+		Message:    message,
+		Metadata:   metadata,
+		Stacktrace: stacktrace, // Optional stacktrace field
 	}
 
 	// OPTIMIZATION 4: Marshal and PutState in one flow
@@ -195,6 +209,157 @@ func (s *SmartContract) getQueryResultForQueryString(ctx contractapi.Transaction
 	}
 
 	return logs, nil
+}
+
+// BuildMerkleTree constructs a Merkle Tree from a list of hashes
+// Returns the Merkle Root (hex string)
+func (s *SmartContract) BuildMerkleTree(hashes []string) string {
+	if len(hashes) == 0 {
+		return ""
+	}
+
+	// Se houver apenas um hash, ele é a raiz
+	if len(hashes) == 1 {
+		return hashes[0]
+	}
+
+	// Copia os hashes para não modificar o original
+	currentLevel := make([]string, len(hashes))
+	copy(currentLevel, hashes)
+
+	// Constrói a árvore bottom-up
+	for len(currentLevel) > 1 {
+		var nextLevel []string
+
+		// Se o número de nós for ímpar, duplica o último
+		if len(currentLevel)%2 != 0 {
+			currentLevel = append(currentLevel, currentLevel[len(currentLevel)-1])
+		}
+
+		// Combina pares de hashes
+		for i := 0; i < len(currentLevel); i += 2 {
+			combinedHash := combineHashes(currentLevel[i], currentLevel[i+1])
+			nextLevel = append(nextLevel, combinedHash)
+		}
+
+		currentLevel = nextLevel
+	}
+
+	return currentLevel[0]
+}
+
+// combineHashes combina dois hashes usando SHA256
+func combineHashes(hash1, hash2 string) string {
+	combined := hash1 + hash2
+	hasher := sha256.New()
+	hasher.Write([]byte(combined))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+// StoreMerkleRoot stores a Merkle Root batch in the ledger
+func (s *SmartContract) StoreMerkleRoot(ctx contractapi.TransactionContextInterface, batchID string, merkleRoot string, timestamp string, numLogs int, logIDs string) error {
+	// Parse timestamp
+	parsedTime, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		parsedTime = time.Now()
+	}
+
+	// Parse logIDs from JSON array string
+	var logIDArray []string
+	if err := json.Unmarshal([]byte(logIDs), &logIDArray); err != nil {
+		return fmt.Errorf("failed to parse logIDs: %v", err)
+	}
+
+	batch := MerkleBatch{
+		BatchID:    batchID,
+		MerkleRoot: merkleRoot,
+		Timestamp:  parsedTime,
+		NumLogs:    numLogs,
+		LogIDs:     logIDArray,
+	}
+
+	batchJSON, err := json.Marshal(batch)
+	if err != nil {
+		return err
+	}
+
+	// Store with key "batch_<batchID>"
+	key := "batch_" + batchID
+	return ctx.GetStub().PutState(key, batchJSON)
+}
+
+// QueryMerkleBatch returns a Merkle batch by ID
+func (s *SmartContract) QueryMerkleBatch(ctx contractapi.TransactionContextInterface, batchID string) (*MerkleBatch, error) {
+	key := "batch_" + batchID
+	batchJSON, err := ctx.GetStub().GetState(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read batch from world state: %v", err)
+	}
+	if batchJSON == nil {
+		return nil, fmt.Errorf("batch %s does not exist", batchID)
+	}
+
+	var batch MerkleBatch
+	err = json.Unmarshal(batchJSON, &batch)
+	if err != nil {
+		return nil, err
+	}
+
+	return &batch, nil
+}
+
+// VerifyBatchIntegrity verifies the integrity of a batch by recalculating Merkle Root
+// Receives hashes as JSON array string
+func (s *SmartContract) VerifyBatchIntegrity(ctx contractapi.TransactionContextInterface, batchID string, logHashes string) (bool, error) {
+	// Get stored batch
+	batch, err := s.QueryMerkleBatch(ctx, batchID)
+	if err != nil {
+		return false, err
+	}
+
+	// Parse log hashes from JSON array
+	var hashes []string
+	if err := json.Unmarshal([]byte(logHashes), &hashes); err != nil {
+		return false, fmt.Errorf("failed to parse logHashes: %v", err)
+	}
+
+	// Verify number of logs matches
+	if len(hashes) != batch.NumLogs {
+		return false, fmt.Errorf("number of hashes (%d) does not match batch size (%d)", len(hashes), batch.NumLogs)
+	}
+
+	// Recalculate Merkle Root
+	recalculatedRoot := s.BuildMerkleTree(hashes)
+
+	// Compare with stored root
+	return recalculatedRoot == batch.MerkleRoot, nil
+}
+
+// GetAllMerkleBatches returns all Merkle batches
+func (s *SmartContract) GetAllMerkleBatches(ctx contractapi.TransactionContextInterface) ([]*MerkleBatch, error) {
+	// Query all keys starting with "batch_"
+	resultsIterator, err := ctx.GetStub().GetStateByRange("batch_", "batch_~")
+	if err != nil {
+		return nil, err
+	}
+	defer resultsIterator.Close()
+
+	var batches []*MerkleBatch
+	for resultsIterator.HasNext() {
+		queryResponse, err := resultsIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var batch MerkleBatch
+		err = json.Unmarshal(queryResponse.Value, &batch)
+		if err != nil {
+			return nil, err
+		}
+		batches = append(batches, &batch)
+	}
+
+	return batches, nil
 }
 
 func main() {

@@ -1,0 +1,39 @@
+{
+  "scenario_id": "S3",
+  "scenario_name": "Baixo Volume + Alta Taxa",
+  "architecture": "postgres",
+  "config": {
+    "total_logs": 10000,
+    "target_rate": 10000,
+    "workers": 100
+  },
+  "execution": {
+    "total_time_seconds": 19.83,
+    "successful_inserts": 9901,
+    "failed_inserts": 99,
+    "actual_throughput_logs_per_second": 499.32
+  },
+  "latency_insert_ms": {
+    "p50": 92.83,
+    "p95": 168.76,
+    "p99": 226.47,
+    "avg": 95.7
+  },
+  "resources": {
+    "cpu": {
+      "avg": 26.441176470588236,
+      "max": 94.7,
+      "min": 15.0
+    },
+    "memory": {
+      "avg": 99.16470588235295,
+      "max": 99.2,
+      "min": 99.1
+    },
+    "disk": {
+      "read_mb": 13525.44921875,
+      "write_mb": 138.26953125
+    }
+  },
+  "timestamp": "2025-10-14T05:09:14.734989"
+}
