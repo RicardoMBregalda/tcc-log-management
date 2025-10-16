@@ -18,6 +18,10 @@ venv/
 
 # Logs e arquivos de saída
 *.log
+
+# Relatórios de verificação gerados automaticamente
+testing/verification_report.json
+
 # Vendor do Go (dependências externas)
 vendor/
 **/vendor/
