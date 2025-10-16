@@ -5,7 +5,6 @@ networks:
 
 services:
   ca.org1.example.com:
-    # ... (sem alterações aqui)
     image: hyperledger/fabric-ca:1.5
     container_name: ca.org1.example.com
     environment:
@@ -21,7 +20,6 @@ services:
       - log-net
 
   orderer.example.com:
-    # ... (sem alterações aqui)
     image: hyperledger/fabric-orderer:2.4
     container_name: orderer.example.com
     cpus: '2.0'
@@ -53,7 +51,6 @@ services:
     networks:
       - log-net
 
-  # --- COUCHDB PARA CADA PEER ---
   couchdb0:
     image: couchdb:3.2
     container_name: couchdb0
@@ -61,7 +58,7 @@ services:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
     ports:
-      - "5984:5984" # CouchDB do peer0
+      - "5984:5984"
     networks:
       - log-net
 
@@ -72,7 +69,7 @@ services:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
     ports:
-      - "6984:5984" # CouchDB do peer1
+      - "6984:5984"
     networks:
       - log-net
 
@@ -83,23 +80,20 @@ services:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=password
     ports:
-      - "7984:5984" # CouchDB do peer2
+      - "7984:5984"
     networks:
       - log-net
 
-  # --- PEERS ATUALIZADOS E NOVO PEER2 ---
   peer0.org1.example.com:
     image: hyperledger/fabric-peer:2.4
     container_name: peer0.org1.example.com
     cpus: '2.0'
     mem_limit: 2g
     environment:
-      # --- VARIÁVEIS DO COUCHDB ADICIONADAS ---
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password
-      # --- Fim das variáveis do CouchDB ---
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=tcc_log_network
       - CORE_VM_DOCKER_HOSTCONFIG_CPUS=1.0
@@ -135,7 +129,7 @@ services:
       - log-net
     depends_on:
       - orderer.example.com
-      - couchdb0 # Adiciona dependência do CouchDB
+      - couchdb0
 
   peer1.org1.example.com:
     image: hyperledger/fabric-peer:2.4
@@ -143,12 +137,10 @@ services:
     cpus: '2.0'
     mem_limit: 2g
     environment:
-      # --- VARIÁVEIS DO COUCHDB ADICIONADAS ---
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
       - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin
       - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=password
-      # --- Fim das variáveis do CouchDB ---
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=tcc_log_network
       - CORE_VM_DOCKER_HOSTCONFIG_CPUS=1.0
@@ -185,9 +177,7 @@ services:
     depends_on:
       - orderer.example.com
       - peer0.org1.example.com
-      - couchdb2 # Adiciona dependência do CouchDB
-
-  # --- MONITORAMENTO (será configurado depois) ---
+      - couchdb1
 
   peer2.org1.example.com:
     image: hyperledger/fabric-peer:2.4
@@ -239,7 +229,6 @@ services:
       - couchdb2
 
   mongo:
-    # ... (sem alterações)
     image: mongo:latest
     container_name: mongo
     ports:
@@ -250,7 +239,6 @@ services:
       - mongo-data:/data/db
 
   cli:
-    # ... (sem alterações)
     image: hyperledger/fabric-tools:2.4
     container_name: cli
     tty: true
@@ -268,15 +256,13 @@ services:
       - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
       - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-    command: /bin/bash
+    command: /bin/bash /scripts/2-init-network.sh
     volumes:
       - /var/run/:/host/var/run/
       - ../chaincode/:/opt/gopath/src/github.com/chaincode
       - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
       - ./config:/opt/gopath/src/github.com/hyperledger/fabric/peer/config
-      - ./setup_network.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/setup_network.sh
-      - ./install_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/install_chaincode.sh
-      - ./test_chaincode.sh:/opt/gopath/src/github.com/hyperledger/fabric/peer/test_chaincode.sh
+      - ./scripts:/scripts
     networks:
       - log-net
     depends_on:
@@ -304,17 +290,10 @@ services:
     ports:
       - "9091:9090"
 
-  # ========================================
-  # MONITORING EXPORTERS
-  # ========================================
-
-  # cAdvisor - Métricas de containers Docker
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
     container_name: cadvisor
     privileged: true
-    devices:
-      - /dev/kmsg
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -327,17 +306,14 @@ services:
       - log-net
     restart: unless-stopped
 
-  # Node Exporter - Métricas do sistema host
   node-exporter:
     image: prom/node-exporter:v1.7.0
     container_name: node-exporter
     command:
-      - '--path.rootfs=/host'
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     volumes:
-      - /:/host:ro,rslave
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     ports:
@@ -346,12 +322,11 @@ services:
       - log-net
     restart: unless-stopped
 
-  # MongoDB Exporter
   mongodb-exporter:
     image: percona/mongodb_exporter:0.40
     container_name: mongodb-exporter
     command:
-      - '--mongodb.uri=mongodb://mongodb:27017'
+      - '--mongodb.uri=mongodb://mongo:27017'
       - '--collect-all'
       - '--compatible-mode'
     ports:
@@ -359,10 +334,9 @@ services:
     networks:
       - log-net
     depends_on:
-      - mongodb
+      - mongo
     restart: unless-stopped
 
-  # Redis Exporter
   redis-exporter:
     image: oliver006/redis_exporter:v1.55.0
     container_name: redis-exporter
@@ -370,36 +344,6 @@ services:
       - REDIS_ADDR=redis://redis:6379
     ports:
       - "9121:9121"
-    networks:
-      - log-net
-    restart: unless-stopped
-
-  # PostgreSQL Exporter - Primary
-  postgres-exporter-primary:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: postgres-exporter-primary
-    environment:
-      - DATA_SOURCE_NAME=postgresql://loguser:logpass@postgres-primary:5432/logdb?sslmode=disable
-      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
-    ports:
-      - "9187:9187"
-    volumes:
-      - ./monitoring/prometheus/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
-    networks:
-      - log-net
-    restart: unless-stopped
-
-  # PostgreSQL Exporter - Standby
-  postgres-exporter-standby:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: postgres-exporter-standby
-    environment:
-      - DATA_SOURCE_NAME=postgresql://loguser:logpass@postgres-standby:5432/logdb?sslmode=disable
-      - PG_EXPORTER_EXTEND_QUERY_PATH=/etc/postgres_exporter/queries.yaml
-    ports:
-      - "9188:9187"
-    volumes:
-      - ./monitoring/prometheus/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
     networks:
       - log-net
     restart: unless-stopped

@@ -24,8 +24,8 @@ API_LONG_TIMEOUT = 120  # para operações longas (batches grandes)
 POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'localhost')
 POSTGRES_PORT = int(os.getenv('POSTGRES_PORT', '5432'))
 POSTGRES_DB = os.getenv('POSTGRES_DB', 'logdb')
-POSTGRES_USER = os.getenv('POSTGRES_USER', 'logadmin')
-POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'logpassword')
+POSTGRES_USER = os.getenv('POSTGRES_USER', 'loguser')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'logpass')
 
 # Connection Pool Settings
 POSTGRES_MIN_CONN = 5

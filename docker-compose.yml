@@ -1,4 +1,0 @@
-networks:
-  log-net:
-    driver: bridge
-    name: tcc_log_network
