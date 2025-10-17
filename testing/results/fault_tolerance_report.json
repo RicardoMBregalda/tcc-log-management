@@ -1,0 +1,228 @@
+{
+  "test_date": "2025-10-16T23:20:39.259109",
+  "total_scenarios": 3,
+  "comparisons": [
+    {
+      "scenario": "primary_database_failure",
+      "hybrid": {
+        "scenario": "primary_database_failure",
+        "architecture": "hybrid",
+        "component": "mongo",
+        "test_start": "2025-10-16T23:16:58.270698",
+        "failure_injected": "2025-10-16T23:17:08.367489",
+        "failure_detected": "2025-10-16T23:17:08.798718",
+        "recovery_started": "2025-10-16T23:17:19.006029",
+        "recovery_completed": "2025-10-16T23:17:25.941155",
+        "test_end": "2025-10-16T23:17:36.049923",
+        "detection_time": 0.43,
+        "recovery_time": 6.94,
+        "total_downtime": 17.14,
+        "logs_before_failure": 70,
+        "logs_during_failure": 0,
+        "logs_after_recovery": 95,
+        "logs_sent_total": 167,
+        "logs_received_total": 167,
+        "logs_lost": 0,
+        "loss_percentage": 0.0,
+        "continued_operating": false,
+        "automatic_recovery": true,
+        "data_consistent": true,
+        "error_messages": [
+          "HTTPConnectionPool(host='localhost', port=5001): Read timed out. (read timeout=5)"
+        ],
+        "notes": []
+      },
+      "traditional": {
+        "scenario": "primary_database_failure",
+        "architecture": "traditional",
+        "component": "postgres-primary",
+        "test_start": "2025-10-16T23:17:43.781759",
+        "failure_injected": "2025-10-16T23:17:53.856756",
+        "failure_detected": "2025-10-16T23:17:54.247859",
+        "recovery_started": "2025-10-16T23:18:04.280635",
+        "recovery_completed": "2025-10-16T23:18:05.568659",
+        "test_end": "2025-10-16T23:18:15.633706",
+        "detection_time": 0.39,
+        "recovery_time": 1.29,
+        "total_downtime": 11.32,
+        "logs_before_failure": 94,
+        "logs_during_failure": 0,
+        "logs_after_recovery": 68,
+        "logs_sent_total": 262,
+        "logs_received_total": 162,
+        "logs_lost": 100,
+        "loss_percentage": 38.17,
+        "continued_operating": false,
+        "automatic_recovery": true,
+        "data_consistent": false,
+        "error_messages": [
+          "Conex\u00e3o recusada"
+        ],
+        "notes": []
+      },
+      "winners": {
+        "faster_detection": "traditional",
+        "faster_recovery": "traditional",
+        "less_data_loss": "hybrid",
+        "better_availability": "tie"
+      },
+      "differences": {
+        "detection_time": 0.04,
+        "recovery_time": 5.65,
+        "data_loss": 38.17
+      }
+    },
+    {
+      "scenario": "replica_node_failure",
+      "hybrid": {
+        "scenario": "replica_node_failure",
+        "architecture": "hybrid",
+        "component": "peer1",
+        "test_start": "2025-10-16T23:18:15.633905",
+        "failure_injected": "2025-10-16T23:18:20.654769",
+        "failure_detected": "2025-10-16T23:18:21.442587",
+        "recovery_started": "2025-10-16T23:18:31.446176",
+        "recovery_completed": "2025-10-16T23:18:49.470491",
+        "test_end": "2025-10-16T23:18:49.470569",
+        "detection_time": 0.79,
+        "recovery_time": 18.02,
+        "total_downtime": null,
+        "logs_before_failure": 48,
+        "logs_during_failure": 95,
+        "logs_after_recovery": 0,
+        "logs_sent_total": 143,
+        "logs_received_total": 143,
+        "logs_lost": 0,
+        "loss_percentage": 0.0,
+        "continued_operating": true,
+        "automatic_recovery": true,
+        "data_consistent": false,
+        "error_messages": [],
+        "notes": []
+      },
+      "traditional": {
+        "scenario": "replica_node_failure",
+        "architecture": "traditional",
+        "component": "postgres-standby",
+        "test_start": "2025-10-16T23:18:54.475434",
+        "failure_injected": "2025-10-16T23:18:59.536560",
+        "failure_detected": "2025-10-16T23:18:59.922151",
+        "recovery_started": "2025-10-16T23:19:09.963970",
+        "recovery_completed": "2025-10-16T23:19:27.968634",
+        "test_end": "2025-10-16T23:19:32.975251",
+        "detection_time": 0.39,
+        "recovery_time": 18.0,
+        "total_downtime": null,
+        "logs_before_failure": 47,
+        "logs_during_failure": 93,
+        "logs_after_recovery": 0,
+        "logs_sent_total": 140,
+        "logs_received_total": 140,
+        "logs_lost": 0,
+        "loss_percentage": 0.0,
+        "continued_operating": true,
+        "automatic_recovery": true,
+        "data_consistent": true,
+        "error_messages": [],
+        "notes": []
+      },
+      "winners": {
+        "faster_detection": "traditional",
+        "faster_recovery": "traditional",
+        "less_data_loss": "tie",
+        "better_availability": "tie"
+      },
+      "differences": {
+        "detection_time": 0.4,
+        "recovery_time": 0.02,
+        "data_loss": 0.0
+      }
+    },
+    {
+      "scenario": "network_partition",
+      "hybrid": {
+        "scenario": "network_partition",
+        "architecture": "hybrid",
+        "component": "mongo",
+        "test_start": "2025-10-16T23:19:32.975350",
+        "failure_injected": "2025-10-16T23:19:38.029104",
+        "failure_detected": "2025-10-16T23:19:38.064362",
+        "recovery_started": "2025-10-16T23:19:48.274927",
+        "recovery_completed": "2025-10-16T23:19:56.046404",
+        "test_end": "2025-10-16T23:20:01.082027",
+        "detection_time": null,
+        "recovery_time": 7.77,
+        "total_downtime": 17.98,
+        "logs_before_failure": 48,
+        "logs_during_failure": 0,
+        "logs_after_recovery": 48,
+        "logs_sent_total": 98,
+        "logs_received_total": 96,
+        "logs_lost": 0,
+        "loss_percentage": 0.0,
+        "continued_operating": true,
+        "automatic_recovery": true,
+        "data_consistent": false,
+        "error_messages": [],
+        "notes": []
+      },
+      "traditional": {
+        "scenario": "network_partition",
+        "architecture": "traditional",
+        "component": "postgres-primary",
+        "test_start": "2025-10-16T23:20:06.085160",
+        "failure_injected": "2025-10-16T23:20:11.113999",
+        "failure_detected": "2025-10-16T23:20:11.148197",
+        "recovery_started": "2025-10-16T23:20:29.188465",
+        "recovery_completed": "2025-10-16T23:20:34.229135",
+        "test_end": "2025-10-16T23:20:39.259037",
+        "detection_time": null,
+        "recovery_time": 5.04,
+        "total_downtime": 23.08,
+        "logs_before_failure": 47,
+        "logs_during_failure": 0,
+        "logs_after_recovery": 47,
+        "logs_sent_total": 97,
+        "logs_received_total": 94,
+        "logs_lost": 0,
+        "loss_percentage": 0.0,
+        "continued_operating": true,
+        "automatic_recovery": true,
+        "data_consistent": false,
+        "error_messages": [],
+        "notes": []
+      },
+      "winners": {
+        "faster_detection": "unknown",
+        "faster_recovery": "traditional",
+        "less_data_loss": "tie",
+        "better_availability": "tie"
+      },
+      "differences": {
+        "detection_time": null,
+        "recovery_time": 2.73,
+        "data_loss": 0.0
+      }
+    }
+  ],
+  "summary": {
+    "hybrid_wins": {
+      "detection": 0,
+      "recovery": 0,
+      "data_loss": 1,
+      "availability": 0
+    },
+    "traditional_wins": {
+      "detection": 2,
+      "recovery": 3,
+      "data_loss": 0,
+      "availability": 0
+    },
+    "ties": {
+      "detection": 1,
+      "recovery": 0,
+      "data_loss": 2,
+      "availability": 3
+    }
+  }
+}
