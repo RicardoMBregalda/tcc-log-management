@@ -382,43 +382,6 @@ def calculate_merkle_root(logs):
     return merkle_root, hashes
 
 
-def store_merkle_batch(batch_id, logs, merkle_root):
-    """
-    Armazena um batch de logs no Fabric com Merkle Root
-    
-    Args:
-        batch_id: ID único do batch
-        logs: Lista de logs do batch
-        merkle_root: Raiz de Merkle calculada
-        
-    Returns:
-        bool: True se sucesso, False caso contrário
-    """
-    try:
-        timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
-        log_ids = [log['id'] for log in logs]
-        
-        # Invoca chaincode diretamente via docker exec
-        success = invoke_chaincode_direct('StoreMerkleRoot', [
-            batch_id,
-            merkle_root,
-            timestamp,
-            str(len(logs)),
-            json.dumps(log_ids)
-        ])
-        
-        if success:
-            logger.info(f"✅ Merkle batch {batch_id} stored in Fabric (Root: {merkle_root[:16]}...)")
-            return True
-        else:
-            logger.error(f"❌ Failed to store Merkle batch {batch_id}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"❌ Error storing Merkle batch {batch_id}: {e}")
-        return False
-
-
 def process_pending_batch():
     """
     🔒 Processa logs pendentes criando batch com Merkle Tree
@@ -497,7 +460,7 @@ def process_pending_batch():
 
 def store_merkle_batch(batch_id, logs, merkle_root):
     """
-    Armazena um batch de logs no Fabric com Merkle Root
+    Armazena um batch de logs no Fabric com Merkle Root e VALIDA o salvamento
     
     Args:
         batch_id: ID único do batch
@@ -505,11 +468,15 @@ def store_merkle_batch(batch_id, logs, merkle_root):
         merkle_root: Raiz de Merkle calculada
         
     Returns:
-        bool: True se sucesso, False caso contrário
+        bool: True se sucesso E verificado, False caso contrário
     """
     try:
         timestamp = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
         log_ids = [log['id'] for log in logs]
+        
+        logger.info(f"🔄 Storing Merkle batch {batch_id} in Fabric...")
+        logger.info(f"   Root: {merkle_root[:32]}...")
+        logger.info(f"   Logs: {len(logs)}")
         
         # Invoca chaincode diretamente via docker exec
         success = invoke_chaincode_direct('StoreMerkleRoot', [
@@ -520,15 +487,35 @@ def store_merkle_batch(batch_id, logs, merkle_root):
             json.dumps(log_ids)
         ])
         
-        if success:
-            logger.info(f"✅ Merkle batch {batch_id} stored in Fabric (Root: {merkle_root[:16]}...)")
-            return True
+        if not success:
+            logger.error(f"❌ Failed to invoke StoreMerkleRoot for batch {batch_id}")
+            return False
+        
+        # ✨ VALIDAÇÃO: Verifica se realmente foi salvo
+        logger.info(f"🔍 Validating batch {batch_id} was saved...")
+        import time
+        time.sleep(1)  # Aguarda 1 segundo para transaction ser processada
+        
+        batch_data = query_chaincode_direct('QueryMerkleBatch', [batch_id])
+        
+        if batch_data and 'merkle_root' in batch_data:
+            stored_root = batch_data.get('merkle_root', '')
+            if stored_root == merkle_root:
+                logger.info(f"✅ Merkle batch {batch_id} VERIFIED in Fabric!")
+                logger.info(f"   Stored Root: {stored_root[:32]}...")
+                return True
+            else:
+                logger.error(f"❌ Root mismatch! Expected: {merkle_root[:32]}..., Got: {stored_root[:32]}...")
+                return False
         else:
-            logger.error(f"❌ Failed to store Merkle batch {batch_id}")
+            logger.error(f"❌ Batch {batch_id} not found in Fabric after invoke!")
+            logger.error(f"   Query result: {batch_data}")
             return False
             
     except Exception as e:
         logger.error(f"❌ Error storing Merkle batch {batch_id}: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
         return False
 
 

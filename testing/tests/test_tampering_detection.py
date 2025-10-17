@@ -236,6 +236,9 @@ def run_tampering_test(batch_size=20, num_logs_to_tamper=3):
     result_before = verify_integrity(batch_id)
     if result_before:
         display_verification_result(result_before, "Batch Original (sem adulteração)")
+    else:
+        print_error("Não foi possível verificar a integridade (Fabric pode estar indisponível)")
+        print_warning("Continuando com o teste de adulteração no MongoDB...")
     
     input(f"\n{Fore.YELLOW}Pressione ENTER para adulterar os logs...{Style.RESET_ALL}\n")
     
@@ -278,22 +281,32 @@ def run_tampering_test(batch_size=20, num_logs_to_tamper=3):
     print(f"{'='*70}{Style.RESET_ALL}\n")
     
     print(f"{Fore.WHITE}Resultados:{Style.RESET_ALL}")
-    print(f"  Verificação Original:  {Fore.GREEN if result_before['is_valid'] else Fore.RED}{'✓ PASSOU' if result_before['is_valid'] else '✗ FALHOU'}{Style.RESET_ALL}")
-    print(f"  Verificação Adulterada: {Fore.GREEN if not result_after['is_valid'] else Fore.RED}{'✓ DETECTOU ADULTERAÇÃO' if not result_after['is_valid'] else '✗ NÃO DETECTOU'}{Style.RESET_ALL}")
-    print(f"  Verificação Restaurada: {Fore.GREEN if result_restored['is_valid'] else Fore.RED}{'✓ PASSOU' if result_restored['is_valid'] else '✗ FALHOU'}{Style.RESET_ALL}")
     
-    print(f"\n{Fore.CYAN}Batch ID testado: {Fore.YELLOW}{batch_id}{Style.RESET_ALL}")
-    
-    # Conclusão
-    if result_before['is_valid'] and not result_after['is_valid'] and result_restored['is_valid']:
-        print(f"\n{Fore.GREEN}{Style.BRIGHT}{'='*70}")
-        print(f"  ✅ TESTE BEM-SUCEDIDO!")
-        print(f"  O Merkle Tree detectou corretamente a adulteração!")
-        print(f"{'='*70}{Style.RESET_ALL}\n")
+    # Verifica se todas as etapas foram concluídas
+    if result_before and result_after and result_restored:
+        print(f"  Verificação Original:  {Fore.GREEN if result_before['is_valid'] else Fore.RED}{'✓ PASSOU' if result_before['is_valid'] else '✗ FALHOU'}{Style.RESET_ALL}")
+        print(f"  Verificação Adulterada: {Fore.GREEN if not result_after['is_valid'] else Fore.RED}{'✓ DETECTOU ADULTERAÇÃO' if not result_after['is_valid'] else '✗ NÃO DETECTOU'}{Style.RESET_ALL}")
+        print(f"  Verificação Restaurada: {Fore.GREEN if result_restored['is_valid'] else Fore.RED}{'✓ PASSOU' if result_restored['is_valid'] else '✗ FALHOU'}{Style.RESET_ALL}")
+        
+        print(f"\n{Fore.CYAN}Batch ID testado: {Fore.YELLOW}{batch_id}{Style.RESET_ALL}")
+        
+        # Conclusão
+        if result_before['is_valid'] and not result_after['is_valid'] and result_restored['is_valid']:
+            print(f"\n{Fore.GREEN}{Style.BRIGHT}{'='*70}")
+            print(f"  ✅ TESTE BEM-SUCEDIDO!")
+            print(f"  O Merkle Tree detectou corretamente a adulteração!")
+            print(f"{'='*70}{Style.RESET_ALL}\n")
+        else:
+            print(f"\n{Fore.RED}{Style.BRIGHT}{'='*70}")
+            print(f"  ❌ TESTE FALHOU!")
+            print(f"  Algo está errado com a detecção de adulteração.")
+            print(f"{'='*70}{Style.RESET_ALL}\n")
     else:
-        print(f"\n{Fore.RED}{Style.BRIGHT}{'='*70}")
-        print(f"  ❌ TESTE FALHOU!")
-        print(f"  Algo está errado com a detecção de adulteração.")
+        print_warning("Teste incompleto: Fabric/Chaincode não está disponível")
+        print_info("Para teste completo, certifique-se que o Fabric está rodando:")
+        print(f"  {Fore.WHITE}docker ps | grep 'peer\\|orderer\\|cli'{Style.RESET_ALL}")
+        print(f"\n{Fore.YELLOW}{'='*70}")
+        print(f"  ⚠️  TESTE PARCIAL (SEM FABRIC)")
         print(f"{'='*70}{Style.RESET_ALL}\n")
 
 
