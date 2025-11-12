@@ -19,3 +19,6 @@ psutil==5.9.6
 # Utilitários
 python-dotenv==1.0.0
 requests==2.31.0
+
+# Testing
+pytest==8.4.2

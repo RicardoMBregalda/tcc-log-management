@@ -18,11 +18,11 @@ sleep 3
 
 # Verificar se está rodando
 if pgrep -f api_server_mongodb.py > /dev/null; then
-    echo "✅ API iniciada com sucesso"
-    curl -s http://localhost:5001/health
+ echo "[OK] API iniciada com sucesso"
+ curl -s http://localhost:5001/health
 else
-    echo "❌ Falha ao iniciar API"
-    echo "Últimos logs:"
-    tail -10 /tmp/api.log
-    exit 1
+ echo "[ERRO] Falha ao iniciar API"
+ echo "Últimos logs:"
+ tail -10 /tmp/api.log
+ exit 1
 fi

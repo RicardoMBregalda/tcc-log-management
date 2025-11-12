@@ -22,6 +22,10 @@ venv/
 vendor/
 **/vendor/
 
-#tcc
+testing/src/results
+testing/results
 
+#tcc
+TCC
+TCC/*
 *.tex
