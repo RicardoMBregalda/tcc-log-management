@@ -199,8 +199,6 @@ docker-compose ps --format "table {{.Name}}\t{{.Status}}" | grep -E "(NAME|Up)" 
 echo ""
 
 print_info "URLs de Acesso:"
-echo "  • Prometheus:    http://localhost:9091"
-echo "  • Grafana:       http://localhost:3001 (admin/admin)"
 echo "  • CouchDB Peer0: http://localhost:5984/_utils (admin/password)"
 echo "  • CouchDB Peer1: http://localhost:6984/_utils (admin/password)"
 echo "  • CouchDB Peer2: http://localhost:7984/_utils (admin/password)"

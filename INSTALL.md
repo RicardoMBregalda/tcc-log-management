@@ -218,49 +218,6 @@ curl http://localhost:5001/health
 # Abra no navegador: http://localhost:5001/api/docs
 ```
 
-## Configuração de Monitoramento
-
-### Prometheus
-
-#### 1. Verificar Configuração
-
-```bash
-# Para PostgreSQL
-cat traditional-architecture/monitoring/prometheus/prometheus.yml
-
-# Para Híbrido
-cat hybrid-architecture/monitoring/prometheus/prometheus.yml
-```
-
-#### 2. Acessar Interface
-
-- URL: `http://localhost:9090`
-- Queries disponíveis:
-  - `rate(http_requests_total[5m])`
-  - `process_cpu_seconds_total`
-  - `process_resident_memory_bytes`
-
-### Grafana
-
-#### 1. Acessar Interface
-
-- URL: `http://localhost:3000`
-- Usuário: `admin`
-- Senha: `admin`
-
-#### 2. Adicionar Data Source
-
-1. Vá em Configuration > Data Sources
-2. Adicione Prometheus:
-   - URL: `http://prometheus:9090`
-   - Access: Server (Default)
-
-#### 3. Importar Dashboards
-
-Dashboards estão disponíveis em:
-- `traditional-architecture/monitoring/grafana/dashboards/`
-- `hybrid-architecture/monitoring/grafana/dashboards/`
-
 ## Verificação da Instalação
 
 ### 1. Arquitetura Tradicional
@@ -419,9 +376,8 @@ rm -rf config/genesis.block config/logchannel.tx
 ## Próximos Passos
 
 1. Executar testes de performance: veja `testing/README.md`
-2. Configurar monitoramento customizado: veja dashboards em `monitoring/`
-3. Ajustar parâmetros de otimização em `testing/config.py`
-4. Revisar logs e métricas em Grafana
+2. Ajustar parâmetros de otimização em `testing/config.py`
+3. Revisar logs da aplicação e métricas do sistema
 
 ## Suporte
 

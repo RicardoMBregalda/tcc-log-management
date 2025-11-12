@@ -201,8 +201,6 @@ docker-compose ps --format "table {{.Name}}\t{{.Status}}" | grep -E "(NAME|Up)" 
 echo ""
 
 print_info "URLs de Acesso:"
-echo "  • Prometheus:         http://localhost:9090"
-echo "  • Grafana:            http://localhost:3000 (admin/admin)"
 echo "  • PostgreSQL Primary: localhost:5432 (loguser/logpass)"
 echo "  • PostgreSQL Standby: localhost:5433 (loguser/logpass)"
 echo ""

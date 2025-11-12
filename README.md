@@ -8,7 +8,6 @@ Sistema de gerenciamento de logs desenvolvido como trabalho de conclusão de cur
 - PostgreSQL 13.12 em cluster primary-standby
 - Replicação streaming síncrona
 - Failover automático
-- Monitoramento com Prometheus e Grafana
 
 ### Arquitetura Híbrida
 - MongoDB para armazenamento off-chain
@@ -68,7 +67,6 @@ O script irá:
 - Iniciar containers PostgreSQL primary e standby
 - Configurar replicação streaming
 - Criar banco de dados e tabelas
-- Iniciar Prometheus e Grafana
 
 #### Testar
 
@@ -96,7 +94,6 @@ O script irá:
 - Iniciar rede Hyperledger Fabric
 - Criar canal e instalar chaincode
 - Iniciar MongoDB e Redis
-- Iniciar Prometheus e Grafana
 
 #### Iniciar API
 
@@ -197,36 +194,16 @@ curl -X POST http://localhost:5001/logs \
 curl http://localhost:5001/logs?source=app-server&limit=10
 ```
 
-## Monitoramento
-
-### Prometheus
-
-- URL: `http://localhost:9090`
-- Métricas: CPU, RAM, I/O, latência, throughput
-
-### Grafana
-
-- URL: `http://localhost:3000`
-- Usuário: `admin`
-- Senha: `admin`
-
-Dashboards pré-configurados:
-- PostgreSQL Overview
-- MongoDB + Fabric Hybrid
-- System Resources
-
 ## Estrutura do Projeto
 
 ```
 tcc-log-management/
 ├── hybrid-architecture/        # Arquitetura híbrida
 │   ├── chaincode/             # Smart contract Fabric
-│   ├── fabric-network/        # Configurações da rede
-│   └── monitoring/            # Prometheus e Grafana
+│   └── fabric-network/        # Configurações da rede
 ├── traditional-architecture/   # Arquitetura PostgreSQL
 │   ├── docker-compose.yml
-│   ├── scripts/               # Scripts SQL
-│   └── monitoring/            # Prometheus e Grafana
+│   └── scripts/               # Scripts SQL
 ├── testing/                   # Framework de testes
 │   ├── src/                   # Código fonte
 │   │   ├── api_server_mongodb.py
@@ -235,10 +212,7 @@ tcc-log-management/
 │   │   └── redis_cache.py
 │   ├── scripts/               # Scripts auxiliares
 │   ├── results/               # Resultados dos testes
-│   └── config.py              # Configurações centralizadas
-└── TCC/                       # Documentação LaTeX
-    └── 2-textuais/
-        └── 6-resultados.tex   # Capítulo de resultados
+└── └── config.py              # Configurações centralizadas
 ```
 
 ## Otimizações Implementadas
@@ -271,41 +245,3 @@ Cenários testados:
 - Falha de nó do banco de dados
 - Recuperação pós-falha
 - Integridade de dados após recovery
-
-## Resultados
-
-Os resultados completos dos experimentos estão documentados no capítulo 6 do TCC (`TCC/2-textuais/6-resultados.tex`).
-
-### Principais Conclusões
-
-#### Performance
-- Arquitetura tradicional: throughput superior em cenários de baixa taxa
-- Arquitetura híbrida: melhor desempenho em cenários de alta taxa com WAL
-- Latência P95: PostgreSQL apresenta valores mais estáveis
-- Latência P99: Fabric introduz variabilidade devido à consensus
-
-#### Recursos
-- PostgreSQL: menor consumo de CPU e RAM em cenários simples
-- Híbrido: maior overhead devido ao blockchain e sincronização
-
-#### Custo Operacional
-- Arquitetura tradicional: US$ 107,39/mês (S1) a US$ 268,71/mês (S9)
-- Arquitetura híbrida: US$ 178,78/mês (S1) a US$ 447,23/mês (S9)
-- Incremento: 66,5% em média
-
-#### Integridade
-- Ambas as arquiteturas garantem ACID
-- Híbrido oferece auditabilidade adicional via blockchain
-- Merkle Tree permite verificação eficiente de integridade
-
-## Licença
-
-Este projeto foi desenvolvido como trabalho acadêmico para conclusão de curso.
-
-## Autor
-
-Trabalho de Conclusão de Curso - Engenharia de Computação
-
-## Contato
-
-Para dúvidas sobre a implementação, consulte a documentação do código ou os comentários inline nos arquivos fonte.
