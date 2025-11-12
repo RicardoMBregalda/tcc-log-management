@@ -14,6 +14,7 @@ Arquitetura:
 """
 
 from flask import Flask, request, jsonify
+from flasgger import Swagger
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 import json
@@ -61,6 +62,38 @@ from utils import (
 )
 
 app = Flask(__name__)
+
+# Configurar Swagger 2.0
+swagger_config = Swagger.DEFAULT_CONFIG.copy()
+swagger_config['specs_route'] = '/api/docs/'
+
+swagger_template = {
+    "swagger": "2.0",
+    "info": {
+        "title": "Sistema de Gerenciamento de Logs - API Híbrida",
+        "description": "API REST para gerenciamento de logs com arquitetura híbrida (MongoDB + Hyperledger Fabric v2.4.9)\n\n"
+                      "**Características:**\n"
+                      "- Write-Ahead Log (WAL) com garantia de 0% de perda de dados\n"
+                      "- Sincronização assíncrona com blockchain (-80% latência)\n"
+                      "- Cache Redis otimizado (TTL 10-15 minutos)\n"
+                      "- Merkle Tree para verificação de integridade\n"
+                      "- Connection pooling (10-100 conexões)\n"
+                      "- Auto-Batching a cada 30 segundos",
+        "version": "1.0.0",
+    },
+    "host": "localhost:5001",
+    "basePath": "/",
+    "schemes": ["http"],
+    "tags": [
+        {"name": "Health", "description": "Verificação de saúde do sistema"},
+        {"name": "Logs", "description": "Operações de criação e consulta de logs"},
+        {"name": "Merkle Tree", "description": "Batching e verificação de integridade"},
+        {"name": "WAL", "description": "Write-Ahead Log - Garantia de durabilidade"},
+        {"name": "Statistics", "description": "Estatísticas e métricas do sistema"}
+    ]
+}
+
+swagger = Swagger(app, config=swagger_config, template=swagger_template)
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -594,9 +627,54 @@ def send_to_fabric_async(log_data, log_id):
         return False
 
 
+@app.route('/', methods=['GET'])
+def index():
+    """Redirect to API documentation"""
+    from flask import redirect
+    return redirect('/api/docs')
+
+
 @app.route('/health', methods=['GET'])
 def health() -> Tuple[Dict[str, Any], int]:
-    """Health check endpoint with WAL status"""
+    """
+    Health check endpoint
+    ---
+    tags:
+      - Health
+    responses:
+      200:
+        description: Sistema operacional
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: healthy
+            database:
+              type: string
+              example: mongodb
+            blockchain:
+              type: string
+              example: fabric
+            wal:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                pending_count:
+                  type: integer
+                total_written:
+                  type: integer
+                total_processed:
+                  type: integer
+                processor_running:
+                  type: boolean
+                guarantee:
+                  type: string
+                  example: 0% data loss
+            optimizations:
+              type: object
+    """
     wal_stats = WAL.get_stats()
     
     return jsonify({
@@ -624,9 +702,22 @@ def health() -> Tuple[Dict[str, Any], int]:
 @app.route('/wal/stats', methods=['GET'])
 def wal_stats() -> Tuple[Dict[str, Any], int]:
     """
-    Retorna estatísticas do Write-Ahead Log
-    
-    Útil para monitoramento e debugging
+    Estatísticas do Write-Ahead Log
+    ---
+    tags:
+      - WAL
+    responses:
+      200:
+        description: Estatísticas do WAL
+        schema:
+          type: object
+          properties:
+            wal_statistics:
+              type: object
+            status:
+              type: string
+            data_loss_guarantee:
+              type: string
     """
     stats = WAL.get_stats()
     
@@ -640,9 +731,26 @@ def wal_stats() -> Tuple[Dict[str, Any], int]:
 @app.route('/wal/force-process', methods=['POST'])
 def wal_force_process() -> Tuple[Dict[str, Any], int]:
     """
-    Força processamento imediato de logs pendentes no WAL
-    
-    Útil para testes e recovery manual
+    Forçar processamento do WAL
+    ---
+    tags:
+      - WAL
+    responses:
+      200:
+        description: Processamento concluído
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+            message:
+              type: string
+            pending_count:
+              type: integer
+            total_processed:
+              type: integer
+      500:
+        description: Erro ao processar
     """
     try:
         # Força uma iteração do processor
@@ -668,16 +776,59 @@ def wal_force_process() -> Tuple[Dict[str, Any], int]:
 @app.route('/logs', methods=['POST'])
 def create_log() -> Tuple[Dict[str, Any], int]:
     """
-    ✨ OTIMIZADO: Cria novo log com WAL + sincronização ASSÍNCRONA
-    
-    Fluxo:
-    1. 🔒 Escreve no WAL (garantia de durabilidade em disco)
-    2. Tenta inserir no MongoDB imediatamente (best effort)
-    3. Se MongoDB falhar, WAL reprocessa automaticamente em background
-    4. Agenda sincronização com Fabric em background
-    5. Retorna imediatamente com garantia de 0% de perda
-    
-    Resultado: Latência mínima + 0% de perda de dados!
+    Criar novo log
+    ---
+    tags:
+      - Logs
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - source
+            - level
+            - message
+          properties:
+            source:
+              type: string
+              example: app-server
+            level:
+              type: string
+              enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+              example: INFO
+            message:
+              type: string
+              example: Application started successfully
+            metadata:
+              type: object
+            stacktrace:
+              type: string
+    responses:
+      201:
+        description: Log criado com sucesso
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            hash:
+              type: string
+            status:
+              type: string
+            mongodb_status:
+              type: string
+            fabric_sync:
+              type: string
+            durability:
+              type: string
+            message:
+              type: string
+      400:
+        description: Campos obrigatórios ausentes
+      500:
+        description: Erro interno
     """
     data = request.json
 
@@ -790,12 +941,46 @@ def create_log() -> Tuple[Dict[str, Any], int]:
 @app.route('/logs', methods=['GET'])
 def get_logs() -> Tuple[Dict[str, Any], int]:
     """
-    ✨ OTIMIZADO: Lista logs com cache inteligente
-    
-    Melhorias:
-    - TTL de cache aumentado para 10 minutos
-    - Índices compostos para queries mais rápidas
-    - Projeção otimizada
+    Listar logs
+    ---
+    tags:
+      - Logs
+    parameters:
+      - name: source
+        in: query
+        type: string
+        description: Filtrar por fonte
+      - name: level
+        in: query
+        type: string
+        enum: [DEBUG, INFO, WARNING, ERROR, CRITICAL]
+        description: Filtrar por nível
+      - name: limit
+        in: query
+        type: integer
+        default: 100
+        description: Número máximo de logs
+      - name: offset
+        in: query
+        type: integer
+        default: 0
+        description: Offset para paginação
+    responses:
+      200:
+        description: Lista de logs
+        schema:
+          type: object
+          properties:
+            logs:
+              type: array
+              items:
+                type: object
+            cached:
+              type: boolean
+            count:
+              type: integer
+      500:
+        description: Erro interno
     """
     # Parâmetros
     source = request.args.get('source')
@@ -851,7 +1036,25 @@ def get_logs() -> Tuple[Dict[str, Any], int]:
 @app.route('/logs/<log_id>', methods=['GET'])
 def get_log_by_id(log_id: str) -> Tuple[Dict[str, Any], int]:
     """
-    ✨ OTIMIZADO: Busca log específico com cache de 15 minutos
+    Buscar log específico
+    ---
+    tags:
+      - Logs
+    parameters:
+      - name: log_id
+        in: path
+        type: string
+        required: true
+        description: ID do log
+    responses:
+      200:
+        description: Log encontrado
+        schema:
+          type: object
+      404:
+        description: Log não encontrado
+      500:
+        description: Erro interno
     """
     # Tenta cache primeiro
     cache_key = f"log_{log_id}"
@@ -891,14 +1094,38 @@ def get_log_by_id(log_id: str) -> Tuple[Dict[str, Any], int]:
 @app.route('/merkle/batch', methods=['POST'])
 def create_merkle_batch() -> Tuple[Dict[str, Any], int]:
     """
-    Cria um batch de logs com Merkle Root
-    
-    Body:
-    {
-        "batch_size": 100  (opcional, padrão: 100)
-    }
-    
-    Pega os últimos N logs sem batch_id, calcula Merkle Root e armazena no Fabric
+    Criar batch com Merkle Tree
+    ---
+    tags:
+      - Merkle Tree
+    parameters:
+      - in: body
+        name: body
+        schema:
+          type: object
+          properties:
+            batch_size:
+              type: integer
+              default: 100
+              description: Número de logs no batch
+    responses:
+      201:
+        description: Batch criado
+        schema:
+          type: object
+          properties:
+            batch_id:
+              type: string
+            merkle_root:
+              type: string
+            num_logs:
+              type: integer
+            status:
+              type: string
+      200:
+        description: Nenhum log disponível
+      500:
+        description: Erro ao criar batch
     """
     try:
         batch_size = request.json.get('batch_size', 100) if request.json else 100
@@ -951,7 +1178,23 @@ def create_merkle_batch() -> Tuple[Dict[str, Any], int]:
 @app.route('/merkle/batch/<batch_id>', methods=['GET'])
 def get_merkle_batch(batch_id: str) -> Tuple[Dict[str, Any], int]:
     """
-    Retorna informações de um batch de Merkle
+    Consultar batch
+    ---
+    tags:
+      - Merkle Tree
+    parameters:
+      - name: batch_id
+        in: path
+        type: string
+        required: true
+        description: ID do batch
+    responses:
+      200:
+        description: Batch encontrado
+      404:
+        description: Batch não encontrado
+      500:
+        description: Erro interno
     """
     try:
         # Busca batch no Fabric usando query direta
@@ -980,7 +1223,34 @@ def get_merkle_batch(batch_id: str) -> Tuple[Dict[str, Any], int]:
 @app.route('/merkle/verify/<batch_id>', methods=['POST'])
 def verify_merkle_batch(batch_id: str) -> Tuple[Dict[str, Any], int]:
     """
-    Verifica a integridade de um batch recalculando Merkle Root
+    Verificar integridade do batch
+    ---
+    tags:
+      - Merkle Tree
+    parameters:
+      - name: batch_id
+        in: path
+        type: string
+        required: true
+        description: ID do batch
+    responses:
+      200:
+        description: Verificação concluída
+        schema:
+          type: object
+          properties:
+            batch_id:
+              type: string
+            valid:
+              type: boolean
+            calculated_root:
+              type: string
+            stored_root:
+              type: string
+      404:
+        description: Batch não encontrado
+      500:
+        description: Erro interno
     """
     try:
         # Busca logs do batch no MongoDB NA MESMA ORDEM da criação
@@ -1024,7 +1294,22 @@ def verify_merkle_batch(batch_id: str) -> Tuple[Dict[str, Any], int]:
 @app.route('/merkle/batches', methods=['GET'])
 def list_merkle_batches() -> Tuple[Dict[str, Any], int]:
     """
-    Lista todos os batches de Merkle
+    Listar batches
+    ---
+    tags:
+      - Merkle Tree
+    responses:
+      200:
+        description: Lista de batches
+        schema:
+          type: object
+          properties:
+            batches:
+              type: array
+            count:
+              type: integer
+      500:
+        description: Erro interno
     """
     try:
         # Busca todos os batches distintos no MongoDB
@@ -1060,7 +1345,26 @@ def list_merkle_batches() -> Tuple[Dict[str, Any], int]:
 
 @app.route('/stats', methods=['GET'])
 def get_stats() -> Tuple[Dict[str, Any], int]:
-    """Estatísticas do sistema"""
+    """
+    Estatísticas do sistema
+    ---
+    tags:
+      - Statistics
+    responses:
+      200:
+        description: Estatísticas gerais
+        schema:
+          type: object
+          properties:
+            total_logs:
+              type: integer
+            fabric_sync_status:
+              type: object
+            optimizations_active:
+              type: boolean
+      500:
+        description: Erro interno
+    """
     try:
         total_logs = logs_collection.count_documents({})
         

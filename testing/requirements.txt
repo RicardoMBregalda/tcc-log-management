@@ -4,6 +4,9 @@
 Flask==3.0.0
 flask-cors==4.0.0
 
+# Swagger/OpenAPI
+flasgger==0.9.7.1
+
 # MongoDB
 pymongo==4.6.0
 
