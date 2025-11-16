@@ -29,3 +29,7 @@ testing/results
 TCC
 TCC/*
 *.tex
+
+#resultados
+testing\go-api\tests\performance\results_go
+testing\go-api\tests\performance\results_go/*
